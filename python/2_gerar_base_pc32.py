@@ -55,6 +55,7 @@ constantes AS (
 base AS (
     SELECT
         tci.cod_tci AS cod_tci_tci,
+        tci.cod_tci AS cod_tci,
         tci.num_convenio AS num_convenio_tci,
         tci.txt_uf AS txt_uf_tci,
         tci.txt_regiao AS txt_regiao_tci,

@@ -68,7 +68,8 @@ function chooseFilterType(rows, column) {
     column === "situacao_contrato_tci" ||
     column === "situacao_contrato_dmp" ||
     column === "situacao_suspensiva_pbi" ||
-    column === "situacao_suspensiva_dmp"
+    column === "situacao_suspensiva_dmp" ||
+    column === "mes_ano_vencimento_suspensiva"
   ) {
     return "select";
   }
@@ -84,7 +85,7 @@ function getColumnClassName(column) {
   if (column === "num_convenio") return "col-convenio";
   if (column === "cod_tci") return "col-tci";
   if (column === "secretaria") return "col-secretaria";
-  if (column.startsWith("dt_") || column.startsWith("prazo_")) return "col-date";
+  if (column.startsWith("dt_") || column.startsWith("prazo_") || column === "mes_ano_vencimento_suspensiva") return "col-date";
   if (column.startsWith("status_")) return "col-status";
   if (column === "vlr_repasse") return "col-money";
   if (column === "fase" || column === "modalidade") return "col-medium";
@@ -106,7 +107,7 @@ function getColumnWidth(column) {
   if (column === "cod_tci") return "96px";
   if (column === "secretaria") return "68px";
   if (column === "uf") return "48px";
-  if (column.startsWith("dt_") || column.startsWith("prazo_")) return "104px";
+  if (column.startsWith("dt_") || column.startsWith("prazo_") || column === "mes_ano_vencimento_suspensiva") return "104px";
   if (column.startsWith("status_")) return "160px";
   if (column === "vlr_repasse") return "124px";
   if (column === "fase" || column === "modalidade") return "120px";
@@ -177,7 +178,8 @@ export function renderBaseDataTable({
     render(data, type, row) {
       if (type === "display") return data ?? "—";
       const raw = row[`${column.key}__raw`];
-      if (raw instanceof Date && !isNaN(raw)) return raw.getTime();
+      // Só usar timestamp na ordenação; busca/filtro da coluna precisa bater com o texto exibido (ex.: Mês/Ano).
+      if (type === "sort" && raw instanceof Date && !isNaN(raw)) return raw.getTime();
       return toPlainText(data);
     },
   }));

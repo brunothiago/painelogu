@@ -1939,6 +1939,7 @@ const exportHeaders = {
 
 const defaultSelectedColumns = [
   "num_convenio",
+  "cod_tci",
   "secretaria",
   "uf",
   "municipio",
@@ -2091,7 +2092,9 @@ display(renderBaseDataTable({
     prazo_homolog_licitacao: dateCol, prazo_inicio_obra: dateCol,
     dt_homolog_licitacao: dateCol, dt_vrpl: dateCol, dt_aio: dateCol,
     dt_inicio_obra: dateCol, dt_vencimento_suspensiva: dateCol, dt_retirada_suspensiva: dateCol,
-    mes_ano_vencimento_suspensiva: d => d instanceof Date && !isNaN(d) ? d.toLocaleDateString("pt-BR", { month: "short", year: "numeric" }).replace(/\.\s*de\s+/, "/") : "—",
+    mes_ano_vencimento_suspensiva: d => d instanceof Date && !isNaN(d)
+      ? `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
+      : "—",
   },
   invalidation,
   exportFilePrefix: "pc32-tabela-filtrada",

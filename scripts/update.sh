@@ -43,6 +43,7 @@ DATA_PATHS=(
     "src/data/base_pc_32_first.csv"
     "src/data/base_alteracoes.csv"
     "src/data/base_diff_latest.json"
+    "src/data/source_freshness.json"
     "data/historico"
     "data/diff"
 )
