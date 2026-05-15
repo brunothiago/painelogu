@@ -35,6 +35,7 @@ function parseBaseRow(d) {
   regiao: pickField(d, "txt_regiao_tci", "txt_regiao"),
   cod_ibge: pickField(d, "cod_ibge_7dig_tci", "cod_ibge_7dig"),
   municipio: pickField(d, "txt_municipio_tci", "txt_municipio"),
+  proponente: pickField(d, "txt_tomador_tci", "txt_tomador"),
   objeto: pickField(d, "dsc_objeto_instrumento_tci", "dsc_objeto_instrumento"),
   secretaria: pickField(d, "txt_sigla_secretaria_tci", "txt_sigla_secretaria"),
   fase: pickField(d, "dsc_fase_pac_tci", "dsc_fase_pac"),
@@ -353,8 +354,8 @@ display(pageTitleBar);
 ```js
 const fConvenioInput = Inputs.search(rawData, {
   placeholder: "Buscar por num. convênio ou TCI…",
-  columns: ["num_convenio", "cod_tci"],
-  label: "Convênio / TCI",
+  columns: ["num_convenio", "cod_tci", "proponente"],
+  label: "Convênio / TCI / Proponente",
 });
 
 function localizeSearchResults(input) {
@@ -1895,7 +1896,7 @@ const tableData = geoScopedData.filter(d =>
 );
 
 const exportColumns = [
-  "_diff_label", "num_convenio", "cod_tci", "secretaria", "regiao", "uf", "municipio", "fase", "modalidade",
+  "_diff_label", "num_convenio", "cod_tci", "secretaria", "regiao", "uf", "municipio", "proponente", "fase", "modalidade",
   "situacao_contrato_tci", "situacao_contrato_dmp", "situacao_suspensiva_pbi", "situacao_suspensiva_dmp", "dt_assinatura", "dt_vencimento_suspensiva", "mes_ano_vencimento_suspensiva",
   "dt_retirada_suspensiva", "perspectiva_de_retirada_da_suspensiva", "dt_lae", "data_limite_licitacao_casa_civil", "status_regra_casa_civil", "prazo_pub_licitacao", "status_pub_licitacao",
   "dt_pub_licitacao", "prazo_homolog_licitacao", "status_homolog_licitacao", "dt_homolog_licitacao",
@@ -1909,6 +1910,7 @@ const exportHeaders = {
   regiao: "Região",
   uf: "UF",
   municipio: "Município",
+  proponente: "Proponente (TCI)",
   fase: "Fase",
   modalidade: "Modalidade",
   situacao_contrato_tci: "Situação Contrato (TCI)",
@@ -1943,6 +1945,7 @@ const defaultSelectedColumns = [
   "secretaria",
   "uf",
   "municipio",
+  "proponente",
   "modalidade",
   "situacao_contrato_tci",
   "situacao_contrato_dmp",
@@ -2073,7 +2076,7 @@ display(renderBaseDataTable({
   columns: activeColumns,
   headers: {
     _diff_label: "Alteração", num_convenio: "Convênio", cod_tci: "TCI", secretaria: "Secretaria",
-    regiao: "Região", uf: "UF", municipio: "Município",
+    regiao: "Região", uf: "UF", municipio: "Município", proponente: "Proponente (TCI)",
     fase: "Fase", modalidade: "Modalidade", situacao_contrato_tci: "Situação Contrato (TCI)",
     situacao_contrato_dmp: "Situação Contrato (DMP)", situacao_suspensiva_pbi: "Situação Suspensiva (PBI)", situacao_suspensiva_dmp: "Situação Suspensiva (DMP)",
     dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)", mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Susp.", dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",

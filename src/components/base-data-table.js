@@ -96,7 +96,8 @@ function getColumnClassName(column) {
     column === "situacao_contrato_dmp" ||
     column === "situacao_suspensiva_pbi" ||
     column === "situacao_suspensiva_dmp" ||
-    column === "data_limite_licitacao_casa_civil"
+    column === "data_limite_licitacao_casa_civil" ||
+    column === "proponente"
   ) return "col-long";
   return "col-default";
 }
@@ -119,6 +120,7 @@ function getColumnWidth(column) {
     column === "situacao_suspensiva_pbi" ||
     column === "situacao_suspensiva_dmp"
   ) return "176px";
+  if (column === "proponente") return "200px";
   if (column === "data_limite_licitacao_casa_civil") return "168px";
   return "132px";
 }

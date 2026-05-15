@@ -61,6 +61,7 @@ base AS (
         tci.txt_regiao AS txt_regiao_tci,
         tci.cod_ibge_7dig AS cod_ibge_7dig_tci,
         tci.txt_municipio AS txt_municipio_tci,
+        tci.txt_tomador AS txt_tomador_tci,
         tci.dsc_objeto_instrumento AS dsc_objeto_instrumento_tci,
         tci.txt_sigla_secretaria AS txt_sigla_secretaria_tci,
         tci.dsc_fase_pac AS dsc_fase_pac_tci,
