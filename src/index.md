@@ -27,20 +27,11 @@ function pickField(row, ...names) {
   return "";
 }
 
-const DATA_PUBLICACAO_PC72 = parseDate("2025-10-21");
-
-function prazoLaeMais60FromRow(d, dtLae, dtAssinatura) {
-  const fromCalc = parseDate(pickField(d, "prazo_pub_licitacao_calc", "prazo_pub_licitacao"));
-  if (fromCalc) return fromCalc;
-  if (!dtLae) return null;
-  if (dtAssinatura && DATA_PUBLICACAO_PC72 && dtAssinatura < DATA_PUBLICACAO_PC72) return null;
-  return addCalendarDays(dtLae, 60);
-}
-
 function parseBaseRow(d) {
   const dt_assinatura = parseDate(pickField(d, "dte_assinatura_contrato_tci", "dte_assinatura_contrato"));
   const dt_lae = parseDate(pickField(d, "dte_primeira_data_lae_tdb", "dte_primeira_data_lae"));
-  const dt_lae_mais_60 = prazoLaeMais60FromRow(d, dt_lae, dt_assinatura);
+  const dt_lae_mais_60 =
+    parseDate(pickField(d, "prazo_lae_mais_60_calc")) ?? (dt_lae ? addCalendarDays(dt_lae, 60) : null);
   const dt_lae_mais_60_mais_120 =
     parseDate(pickField(d, "prazo_lae_mais_60_mais_120_calc")) ??
     (dt_lae_mais_60 ? addCalendarDays(dt_lae_mais_60, 120) : null);
