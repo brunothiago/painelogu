@@ -34,7 +34,7 @@ function parseBaseRow(d) {
     parseDate(pickField(d, "prazo_lae_mais_60_calc")) ?? (dt_lae ? addCalendarDays(dt_lae, 60) : null);
   const dt_lae_mais_60_mais_120 =
     parseDate(pickField(d, "prazo_lae_mais_60_mais_120_calc")) ??
-    (dt_lae_mais_60 ? addCalendarDays(dt_lae_mais_60, 120) : null);
+    (dt_lae_mais_60 ? addCalendarDays(addCalendarDays(dt_lae_mais_60, 120), 60) : null);
 
   return {
   cod_tci: pickField(d, "cod_tci_tci", "cod_tci"),
@@ -1934,7 +1934,7 @@ const exportHeaders = {
   dt_assinatura: "Assinatura (TCI)",
   dt_lae: "LAE (TDB)",
   dt_lae_mais_60: "LAE + 60 dias (CALC)",
-  dt_lae_mais_60_mais_120: "LAE + 60 + 120 dias (CALC)",
+  dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60)+ 120 + 60 (CALC)",
   data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)",
   status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)",
   prazo_pub_licitacao: "Prazo Publicação (CALC)",
@@ -2095,7 +2095,7 @@ display(renderBaseDataTable({
     situacao_contrato_dmp: "Situação Contrato (DMP)", situacao_suspensiva_pbi: "Situação Suspensiva (PBI)", situacao_suspensiva_dmp: "Situação Suspensiva (DMP)",
     dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)", mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Susp.", dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
     perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
-    dt_assinatura: "Assinatura (TCI)", dt_lae: "LAE (TDB)", dt_lae_mais_60: "LAE + 60 dias (CALC)", dt_lae_mais_60_mais_120: "LAE + 60 + 120 dias (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
+    dt_assinatura: "Assinatura (TCI)", dt_lae: "LAE (TDB)", dt_lae_mais_60: "LAE + 60 dias (CALC)", dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60)+ 120 + 60 (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
     status_pub_licitacao: "Status Publicação (CALC)", dt_pub_licitacao: "Pub. Licitação (TGOV)",
     prazo_homolog_licitacao: "Prazo Homolog. (CALC)", status_homolog_licitacao: "Status Homolog. (CALC)",
     dt_homolog_licitacao: "Homolog. Licitação (TGOV)", dt_vrpl: "VRPL (TDB)", dt_aio: "AIO (TDB)", prazo_inicio_obra: "Prazo Início Obra (CALC)", status_inicio_obra: "Status Início Obra (CALC)",
