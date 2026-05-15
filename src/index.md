@@ -10,7 +10,7 @@ import {dsvFormat} from "d3-dsv";
 import {renderBaseDataTable} from "./components/base-data-table.js";
 import {metricGrid} from "./components/cards.js";
 import {cascadeChart, matchesCascadeSelection} from "./components/cascade-chart.js";
-import {parseDate, formatNumber, formatCurrencyCompact, formatPercent, formatDate} from "./lib/formatters.js";
+import {parseDate, addCalendarDays, formatNumber, formatCurrencyCompact, formatPercent, formatDate} from "./lib/formatters.js";
 import {PALETTE, SITUACAO_CORES, SUSPENSIVA_CORES, SITUACAO_ORDER, SUSPENSIVA_ORDER, LICITACAO_CORES, INICIO_OBRA_CORES, REGIAO_ORDER, getRegiaoColor, getUfColor, getMunicipioColor} from "./lib/theme.js";
 import {hexToRgba} from "./lib/dom-helpers.js";
 
@@ -27,7 +27,24 @@ function pickField(row, ...names) {
   return "";
 }
 
+const DATA_PUBLICACAO_PC72 = parseDate("2025-10-21");
+
+function prazoLaeMais60FromRow(d, dtLae, dtAssinatura) {
+  const fromCalc = parseDate(pickField(d, "prazo_pub_licitacao_calc", "prazo_pub_licitacao"));
+  if (fromCalc) return fromCalc;
+  if (!dtLae) return null;
+  if (dtAssinatura && DATA_PUBLICACAO_PC72 && dtAssinatura < DATA_PUBLICACAO_PC72) return null;
+  return addCalendarDays(dtLae, 60);
+}
+
 function parseBaseRow(d) {
+  const dt_assinatura = parseDate(pickField(d, "dte_assinatura_contrato_tci", "dte_assinatura_contrato"));
+  const dt_lae = parseDate(pickField(d, "dte_primeira_data_lae_tdb", "dte_primeira_data_lae"));
+  const dt_lae_mais_60 = prazoLaeMais60FromRow(d, dt_lae, dt_assinatura);
+  const dt_lae_mais_60_mais_120 =
+    parseDate(pickField(d, "prazo_lae_mais_60_mais_120_calc")) ??
+    (dt_lae_mais_60 ? addCalendarDays(dt_lae_mais_60, 120) : null);
+
   return {
   cod_tci: pickField(d, "cod_tci_tci", "cod_tci"),
   num_convenio: pickField(d, "num_convenio_tci", "num_convenio"),
@@ -43,7 +60,7 @@ function parseBaseRow(d) {
   situacao_contrato_tci: pickField(d, "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
   situacao_contrato_dmp: pickField(d, "situacao_contrato_dmp", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
   situacao: pickField(d, "situacao_contrato_dmp", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
-  dt_assinatura: parseDate(pickField(d, "dte_assinatura_contrato_tci", "dte_assinatura_contrato")),
+  dt_assinatura,
   situacao_suspensiva_dmp: pickField(d, "situacao_da_analise_suspensiva_dmp", "situacao_da_analise_suspensiva_cgpac", "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
   situacao_suspensiva: pickField(d, "situacao_da_analise_suspensiva_dmp", "situacao_da_analise_suspensiva_cgpac", "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
   situacao_suspensiva_pbi: pickField(d, "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
@@ -52,7 +69,9 @@ function parseBaseRow(d) {
   dt_vencimento_suspensiva: parseDate(pickField(d, "vencimento_da_suspensiva_pbi", "vencimento_da_suspensiva")),
   mes_ano_vencimento_suspensiva: parseDate(pickField(d, "vencimento_da_suspensiva_pbi", "vencimento_da_suspensiva")),
   dt_retirada_suspensiva: parseDate(pickField(d, "dte_retirada_suspensiva_tgov", "dte_retirada_suspensiva")),
-  dt_lae: parseDate(pickField(d, "dte_primeira_data_lae_tdb", "dte_primeira_data_lae")),
+  dt_lae,
+  dt_lae_mais_60,
+  dt_lae_mais_60_mais_120,
   dt_pub_licitacao: parseDate(pickField(d, "dte_publicacao_licitacao_tgov", "dte_publicacao_licitacao")),
   dt_homolog_licitacao: parseDate(pickField(d, "dte_homologacao_licitacao_tgov", "dte_homologacao_licitacao")),
   dt_vrpl: parseDate(pickField(d, "dte_vrpl_tdb", "dte_vrpl")),
@@ -1898,7 +1917,7 @@ const tableData = geoScopedData.filter(d =>
 const exportColumns = [
   "_diff_label", "num_convenio", "cod_tci", "secretaria", "regiao", "uf", "municipio", "proponente", "fase", "modalidade",
   "situacao_contrato_tci", "situacao_contrato_dmp", "situacao_suspensiva_pbi", "situacao_suspensiva_dmp", "dt_assinatura", "dt_vencimento_suspensiva", "mes_ano_vencimento_suspensiva",
-  "dt_retirada_suspensiva", "perspectiva_de_retirada_da_suspensiva", "dt_lae", "data_limite_licitacao_casa_civil", "status_regra_casa_civil", "prazo_pub_licitacao", "status_pub_licitacao",
+  "dt_retirada_suspensiva", "perspectiva_de_retirada_da_suspensiva", "dt_lae", "dt_lae_mais_60", "dt_lae_mais_60_mais_120", "data_limite_licitacao_casa_civil", "status_regra_casa_civil", "prazo_pub_licitacao", "status_pub_licitacao",
   "dt_pub_licitacao", "prazo_homolog_licitacao", "status_homolog_licitacao", "dt_homolog_licitacao",
   "dt_vrpl", "dt_aio", "prazo_inicio_obra", "status_inicio_obra", "dt_inicio_obra", "vlr_repasse",
 ];
@@ -1923,6 +1942,8 @@ const exportHeaders = {
   perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
   dt_assinatura: "Assinatura (TCI)",
   dt_lae: "LAE (TDB)",
+  dt_lae_mais_60: "LAE + 60 dias (CALC)",
+  dt_lae_mais_60_mais_120: "LAE + 60 + 120 dias (CALC)",
   data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)",
   status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)",
   prazo_pub_licitacao: "Prazo Publicação (CALC)",
@@ -1957,6 +1978,8 @@ const defaultSelectedColumns = [
   "dt_retirada_suspensiva",
   "perspectiva_de_retirada_da_suspensiva",
   "dt_lae",
+  "dt_lae_mais_60",
+  "dt_lae_mais_60_mais_120",
   "data_limite_licitacao_casa_civil",
   "status_regra_casa_civil",
   "status_pub_licitacao",
@@ -2081,7 +2104,7 @@ display(renderBaseDataTable({
     situacao_contrato_dmp: "Situação Contrato (DMP)", situacao_suspensiva_pbi: "Situação Suspensiva (PBI)", situacao_suspensiva_dmp: "Situação Suspensiva (DMP)",
     dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)", mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Susp.", dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
     perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
-    dt_assinatura: "Assinatura (TCI)", dt_lae: "LAE (TDB)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
+    dt_assinatura: "Assinatura (TCI)", dt_lae: "LAE (TDB)", dt_lae_mais_60: "LAE + 60 dias (CALC)", dt_lae_mais_60_mais_120: "LAE + 60 + 120 dias (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
     status_pub_licitacao: "Status Publicação (CALC)", dt_pub_licitacao: "Pub. Licitação (TGOV)",
     prazo_homolog_licitacao: "Prazo Homolog. (CALC)", status_homolog_licitacao: "Status Homolog. (CALC)",
     dt_homolog_licitacao: "Homolog. Licitação (TGOV)", dt_vrpl: "VRPL (TDB)", dt_aio: "AIO (TDB)", prazo_inicio_obra: "Prazo Início Obra (CALC)", status_inicio_obra: "Status Início Obra (CALC)",
@@ -2091,7 +2114,7 @@ display(renderBaseDataTable({
     _diff_label: diffCol,
     cod_tci: tciLinkCol,
     vlr_repasse: d => d.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
-    dt_assinatura: dateCol, dt_lae: dateCol, data_limite_licitacao_casa_civil: dateCol, prazo_pub_licitacao: dateCol, dt_pub_licitacao: dateCol,
+    dt_assinatura: dateCol, dt_lae: dateCol, dt_lae_mais_60: dateCol, dt_lae_mais_60_mais_120: dateCol, data_limite_licitacao_casa_civil: dateCol, prazo_pub_licitacao: dateCol, dt_pub_licitacao: dateCol,
     prazo_homolog_licitacao: dateCol, prazo_inicio_obra: dateCol,
     dt_homolog_licitacao: dateCol, dt_vrpl: dateCol, dt_aio: dateCol,
     dt_inicio_obra: dateCol, dt_vencimento_suspensiva: dateCol, dt_retirada_suspensiva: dateCol,

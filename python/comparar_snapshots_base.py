@@ -100,6 +100,7 @@ STATUS_FIELDS = {
 
 TIME_DRIVEN_FIELDS = {
     "prazo_pub_licitacao_calc",
+    "prazo_lae_mais_60_mais_120_calc",
     "prazo_homolog_licitacao_120d",
     "prazo_homolog_licitacao_calc",
     "prazo_inicio_obra_calc",

@@ -4,6 +4,14 @@ export function parseDate(v) {
   return isNaN(d) ? null : d;
 }
 
+/** Soma dias corridos em calendário (UTC), preservando o horário de referência. */
+export function addCalendarDays(date, days) {
+  if (!(date instanceof Date) || isNaN(date)) return null;
+  const out = new Date(date.getTime());
+  out.setUTCDate(out.getUTCDate() + days);
+  return out;
+}
+
 const numberFormatter = new Intl.NumberFormat("pt-BR");
 const currencyCompactFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",

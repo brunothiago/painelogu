@@ -190,6 +190,12 @@ SELECT
     -- prazo homologacao: o maior entre publicacao + 120 dias e a data limite casa civil
     GREATEST(prazo_homolog_licitacao_120d, c.data_limite_licitacao_casa_civil) AS prazo_homolog_licitacao_calc,
 
+    -- prazo encadeado a partir da LAE: (LAE + 60) + 120 dias corridos
+    CASE
+        WHEN prazo_pub_licitacao_calc IS NOT NULL
+        THEN prazo_pub_licitacao_calc + 120
+    END AS prazo_lae_mais_60_mais_120_calc,
+
     -- status publicacao licitacao | fonte: derivada de base.dte_primeira_data_lae + base.dsc_situacao_contrato_mcid + base.dte_publicacao_licitacao + base.prazo_pub_licitacao
     CASE
         WHEN dte_assinatura_contrato_tci < c.data_publicacao_pc72 THEN NULL
