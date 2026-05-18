@@ -13,7 +13,7 @@
       "key": "transferegov",
       "label": "Transferegov",
       "sigla": "TGOV",
-      "updated_at": "2026-05-15",
+      "updated_at": "2026-05-18",
       "method": "greatest(max(tab_convenios.dte_carga), max(tab_licitacao.dte_carga))",
       "fallback": false
     },
@@ -29,7 +29,7 @@
       "key": "power_bi_caixa",
       "label": "Power BI Caixa",
       "sigla": "PBI",
-      "updated_at": "2026-05-15",
+      "updated_at": "2026-05-18",
       "method": "max(data_atualizacao)",
       "fallback": false
     },
