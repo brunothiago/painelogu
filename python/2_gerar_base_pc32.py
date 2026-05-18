@@ -138,11 +138,11 @@ base AS (
 
         -- soma de datas a partir da LAE (sempre que houver LAE; independente da regra PC 72)
         CASE WHEN tdb.dte_primeira_data_lae IS NOT NULL
-             THEN tdb.dte_primeira_data_lae + 60
+             THEN tdb.dte_primeira_data_lae + 120
         END AS prazo_lae_mais_60_calc,
 
         CASE WHEN tdb.dte_primeira_data_lae IS NOT NULL
-             THEN tdb.dte_primeira_data_lae + 60 + 120 + 60
+             THEN tdb.dte_primeira_data_lae + 120 + 120 + 60
         END AS prazo_lae_mais_60_mais_120_calc,
 
         CASE WHEN tci.dte_assinatura_contrato < c.data_publicacao_pc72 THEN NULL
