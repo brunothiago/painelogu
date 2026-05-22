@@ -132,6 +132,7 @@ export function renderBaseDataTable({
   formatters = {},
   invalidation,
   exportFilePrefix = "tabela-filtrada",
+  onFilteredRowsChange,
 }) {
   const processedRows = rows.map((row) => {
     const processed = {__source: row};
@@ -280,10 +281,12 @@ export function renderBaseDataTable({
 
   function updateControls() {
     const visibleRows = dataTable.rows({search: "applied"}).data().toArray();
+    const visibleSourceRows = visibleRows.map((row) => row.__source);
     summary.textContent = `${visibleRows.length.toLocaleString("pt-BR")} registro${visibleRows.length === 1 ? "" : "s"} encontrado${visibleRows.length === 1 ? "" : "s"} na tabela`;
     exportBtn.textContent = `Exportar tabela (${visibleRows.length.toLocaleString("pt-BR")})`;
     exportBtn.disabled = visibleRows.length === 0;
     clearFiltersBtn.style.display = hasActiveFilters() ? "" : "none";
+    onFilteredRowsChange?.(visibleSourceRows);
   }
 
   clearFiltersBtn.addEventListener("click", () => {

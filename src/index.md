@@ -1733,7 +1733,9 @@ if (vencida > 0 || prox30 > 0) {
 display(alertEl);
 }
 
-const selectedCascade = view(cascadeChart(geoScopedData));
+const tableRowsForCharts = Object.assign(document.createElement("div"), {value: null});
+
+const selectedCascade = view(cascadeChart(geoScopedData, tableRowsForCharts));
 ```
 
 </div>
@@ -2115,6 +2117,10 @@ display(renderBaseDataTable({
   },
   invalidation,
   exportFilePrefix: "pc32-tabela-filtrada",
+  onFilteredRowsChange(rows) {
+    tableRowsForCharts.value = rows;
+    tableRowsForCharts.dispatchEvent(new Event("input", {bubbles: true}));
+  },
 }));
 ```
 

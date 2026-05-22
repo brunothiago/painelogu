@@ -3967,6 +3967,21 @@ body {
     color: var(--theme-foreground-muted);
 }
 
+.casc-month-chart {
+    display: grid;
+    gap: 0.55rem;
+    padding: 1.1rem 1.2rem;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(215,210,199,0.9);
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(20,31,39,0.05);
+}
+
+.casc-month-chart__scroll {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
 .casc-bar {
     display: flex;
     height: 40px;

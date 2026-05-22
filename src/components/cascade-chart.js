@@ -1,7 +1,123 @@
+import * as Plot from "@observablehq/plot";
 import {SITUACAO_CORES, SUSPENSIVA_CORES, SITUACAO_ORDER, SUSPENSIVA_ORDER, URGENCIA_CORES, PALETTE} from "../lib/theme.js";
 import {hexToRgba} from "../lib/dom-helpers.js";
 
 const URGENCIA_ORDER = ["Vencida", "Próximos 30 dias", "31–90 dias", "Mais de 90 dias", "Sem data"];
+const MS_PER_DAY = 86400000;
+
+function isSuspensivaPendente(d) {
+  return !d.dt_retirada_suspensiva && d.situacao_suspensiva !== "Suspensiva retirada";
+}
+
+export {isSuspensivaPendente};
+
+function monthYearKey(date) {
+  if (!(date instanceof Date) || isNaN(date)) return null;
+  return date.getUTCFullYear() * 100 + (date.getUTCMonth() + 1);
+}
+
+function monthYearLabel(sortKey) {
+  if (sortKey == null) return "Sem data";
+  const month = sortKey % 100;
+  const year = Math.floor(sortKey / 100);
+  return `${String(month).padStart(2, "0")}/${year}`;
+}
+
+function urgencyColorForMonth(sortKey) {
+  if (sortKey == null) return URGENCIA_CORES["Sem data"];
+  const year = Math.floor(sortKey / 100);
+  const month = sortKey % 100;
+  const ref = new Date(Date.UTC(year, month - 1, 15));
+  const today = new Date();
+  const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffDays = Math.floor((ref.getTime() - todayUtc) / MS_PER_DAY);
+  if (diffDays < 0) return URGENCIA_CORES["Vencida"];
+  if (diffDays <= 30) return URGENCIA_CORES["Próximos 30 dias"];
+  if (diffDays <= 90) return URGENCIA_CORES["31–90 dias"];
+  return URGENCIA_CORES["Mais de 90 dias"];
+}
+
+function buildVencimentoMonthChart(rows, options = {}) {
+  const {fromTable = false} = options;
+  const counts = new Map();
+  let semData = 0;
+  for (const row of rows) {
+    const key = monthYearKey(row.dt_vencimento_suspensiva);
+    if (key == null) {
+      semData += 1;
+      continue;
+    }
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  const byMonth = [...counts.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([sortKey, qtd]) => ({
+      sortKey,
+      label: monthYearLabel(sortKey),
+      qtd,
+      color: urgencyColorForMonth(sortKey),
+    }));
+
+  if (semData > 0) {
+    byMonth.push({
+      sortKey: null,
+      label: "Sem data",
+      qtd: semData,
+      color: URGENCIA_CORES["Sem data"],
+    });
+  }
+
+  const wrap = el("div", "casc-month-chart");
+  const header = el("div", "casc-level__header");
+  const title = el("strong", "casc-level__title");
+  title.textContent = `${rows.length.toLocaleString("pt-BR")} contratos com suspensiva pendente`;
+  const subtitle = el("span", "casc-level__subtitle");
+  subtitle.textContent = fromTable
+    ? "por mês de vencimento (PBI) · recorte da Base de Dados"
+    : "por mês de vencimento (PBI)";
+  header.append(title, subtitle);
+  wrap.append(header);
+
+  if (byMonth.length === 0) {
+    const empty = el("p", "casc-empty");
+    empty.textContent = "Nenhum contrato com suspensiva pendente no recorte atual.";
+    wrap.append(empty);
+    return wrap;
+  }
+
+  const scroll = el("div", "casc-month-chart__scroll");
+  scroll.append(
+    Plot.plot({
+      width: Math.max(420, byMonth.length * 52 + 48),
+      height: 260,
+      marginLeft: 48,
+      marginRight: 16,
+      marginBottom: 56,
+      marginTop: 12,
+      style: {fontFamily: "var(--font-sans, IBM Plex Sans, sans-serif)", fontSize: 12},
+      x: {
+        label: null,
+        domain: byMonth.map((d) => d.label),
+        tickRotate: -40,
+      },
+      y: {label: "Contratos", grid: true, nice: true},
+      marks: [
+        Plot.barY(byMonth, {x: "label", y: "qtd", fill: "color", rx: 4}),
+        Plot.text(byMonth, {
+          x: "label",
+          y: "qtd",
+          text: (d) => (d.qtd > 0 ? d.qtd.toLocaleString("pt-BR") : ""),
+          dy: -6,
+          fontSize: 11,
+          fill: "#5b6470",
+        }),
+      ],
+    })
+  );
+  wrap.append(scroll);
+  return wrap;
+}
 
 function el(tag, cls) {
   const node = document.createElement(tag);
@@ -154,11 +270,23 @@ export function matchesCascadeSelection(d, selection = {}) {
 
 /**
  * @param {Array} data - dados filtrados
+ * @param {HTMLElement} [tableRowsRef] - linhas visíveis na Base de Dados (atualiza o gráfico mensal)
  */
-export function cascadeChart(data) {
+export function cascadeChart(data, tableRowsRef = null) {
   const container = Object.assign(el("div", "casc-chart"), {
     value: {suspensiva: null, urgencia: null}
   });
+
+  if (tableRowsRef) {
+    tableRowsRef.addEventListener("input", () => render());
+  }
+
+  function monthChartRows(pendentes) {
+    const tableRows = tableRowsRef?.value;
+    if (tableRows == null) return pendentes;
+    const visible = new Set(tableRows);
+    return pendentes.filter((d) => visible.has(d));
+  }
 
   function setFilter(key, label) {
     const nextValue = container.value[key] === label ? null : label;
@@ -208,7 +336,7 @@ export function cascadeChart(data) {
       return;
     }
 
-    const pendentes = filteredData.filter(d => !d.dt_retirada_suspensiva);
+    const pendentes = filteredData.filter(isSuspensivaPendente);
 
     const byAnlise = SUSPENSIVA_ORDER
       .map(s => ({
@@ -254,6 +382,13 @@ export function cascadeChart(data) {
         }
       )
     );
+
+    if (pendentes.length > 0) {
+      const monthRows = monthChartRows(pendentes);
+      const tableFiltered = tableRowsRef?.value != null && monthRows.length !== pendentes.length;
+      container.append(connector("calendário de vencimento da suspensiva (PBI)"));
+      container.append(buildVencimentoMonthChart(monthRows, {fromTable: tableFiltered}));
+    }
   }
 
   render();
