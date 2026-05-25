@@ -1,6 +1,6 @@
 {
-  "snapshot_atual": "2026-05-22",
-  "snapshot_anterior": "2026-05-20",
+  "snapshot_atual": "2026-05-25",
+  "snapshot_anterior": "2026-05-22",
   "snapshot_primeiro": "2026-04-07",
   "total_atual": 1583,
   "total_anterior": 1583,
@@ -8,17 +8,17 @@
   "resumo": {
     "entered": 0,
     "exited": 0,
-    "changed_records": 103,
-    "changed_data_records": 102,
+    "changed_records": 41,
+    "changed_data_records": 40,
     "changed_time_records": 1
   },
   "mudancas_status": {
-    "status_suspensiva_calc": 3,
-    "status_pub_licitacao_calc": 7,
-    "status_homolog_licitacao_calc": 4,
+    "status_suspensiva_calc": 0,
+    "status_pub_licitacao_calc": 1,
+    "status_homolog_licitacao_calc": 0,
     "status_inicio_obra_calc": 9,
     "status_regra_casa_civil_calc": 0,
-    "urgencia_suspensiva_calc": 13,
-    "fase_atual_calc": 48
+    "urgencia_suspensiva_calc": 3,
+    "fase_atual_calc": 9
   }
 }
