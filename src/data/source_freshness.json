@@ -1,11 +1,11 @@
 {
-  "snapshot_atual": "2026-05-25",
+  "snapshot_atual": "2026-05-28",
   "sources": [
     {
       "key": "tci_mcid",
       "label": "SACI/ Ministério das Cidades",
       "sigla": "TCI/MCID",
-      "updated_at": "2026-05-25",
+      "updated_at": "2026-05-28",
       "method": "max(dte_carga)",
       "fallback": false
     },
@@ -13,7 +13,7 @@
       "key": "transferegov",
       "label": "Transferegov",
       "sigla": "TGOV",
-      "updated_at": "2026-05-25",
+      "updated_at": "2026-05-28",
       "method": "greatest(max(tab_convenios.dte_carga), max(tab_licitacao.dte_carga))",
       "fallback": false
     },
@@ -21,7 +21,7 @@
       "key": "bdgestores",
       "label": "BDGestores",
       "sigla": "TDB",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-05-28",
       "method": "max(dte_posicao)",
       "fallback": false
     },
@@ -29,7 +29,7 @@
       "key": "power_bi_caixa",
       "label": "Power BI Caixa",
       "sigla": "PBI",
-      "updated_at": "2026-05-25",
+      "updated_at": "2026-05-28",
       "method": "max(data_atualizacao)",
       "fallback": false
     },
@@ -37,7 +37,7 @@
       "key": "dmp",
       "label": "Diretoria de Monitoramento de Projetos",
       "sigla": "DMP",
-      "updated_at": "2026-05-25",
+      "updated_at": "2026-05-28",
       "method": "snapshot_atual",
       "fallback": true,
       "note": "Fallback: nenhuma tabela/coluna de carga dedicada da DMP foi identificada no pipeline atual."
