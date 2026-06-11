@@ -23,7 +23,7 @@ const footerSourceFreshness = (sourceFreshness?.sources ?? []).map(
 );
 
 export default {
-  title: "Painel OGU - NOVO PAC - Novas Seleções - DMP/SE",
+  title: "Painel DMP/MCid-OGU-Novo PAC",
   root: "src",
   output: "dist",
   base: "/painelogu/",
