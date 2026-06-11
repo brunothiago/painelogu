@@ -347,7 +347,7 @@ const pageTitleBar = document.createElement("div");
 pageTitleBar.className = "page-titlebar dashboard-toolbar";
 pageTitleBar.innerHTML = `
   <div class="page-titlebar__heading dashboard-toolbar__title">
-    <h1>Painel PC 32 — Novo PAC Seleção</h1>
+    <h1>Painel OGU - NOVO PAC - Novas Seleções</h1>
   </div>
   <div class="page-titlebar__meta dashboard-toolbar__side" aria-label="Data de atualização">
     <div class="dashboard-toolbar__meta">

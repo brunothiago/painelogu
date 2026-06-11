@@ -1,8 +1,10 @@
-# Plano Operacional — Painel PC 32 DMP
+# Plano Operacional — Painel OGU (painelogu)
 
 ## Visão Geral
 
 Este repositório publica um painel estático em Observable Framework para acompanhamento dos contratos da Portaria Conjunta 32 do Novo PAC Seleção.
+
+Publicação: GitHub Pages em `https://brunothiago.github.io/painelogu/`
 
 O projeto tem dois blocos:
 

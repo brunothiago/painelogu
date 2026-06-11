@@ -26,6 +26,7 @@ export default {
   title: "Painel DMP/MCid - PC 32 Novo PAC",
   root: "src",
   output: "dist",
+  base: "/painelogu/",
   theme: [],
   sidebar: false,
   toc: false,
@@ -47,10 +48,10 @@ export default {
     <div class="site-shell">
       <div class="site-topbar">
         <div class="brand-lockup">
-          <a class="brand-home" href="./" aria-label="Página inicial do Painel PC 32 — Novo PAC Seleção">
+          <a class="brand-home" href="./" aria-label="Página inicial do Painel OGU - NOVO PAC - Novas Seleções - DMP/SE">
             <div class="brand-text">
               <span class="brand-kicker">Ministério das Cidades</span>
-              <span class="brand-title">Painel PC 32 — Novo PAC Seleção</span>
+              <span class="brand-title">Painel OGU - NOVO PAC - Novas Seleções - DMP/SE</span>
             </div>
           </a>
         </div>
