@@ -47,6 +47,11 @@ jobs:
         with:
           path: dist
 
+      - name: Wait for prior Pages deployment
+        run: |
+          echo "Aguardando liberação do deploy anterior no GitHub Pages..."
+          sleep 120
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
