@@ -118,8 +118,12 @@ const snapshotPrimeiroLabel = baseDiffLatest?.snapshot_primeiro
   : "primeiro registro";
 
 function maxSnapshotDateLabel(snapshotMeta) {
+  const snapshotAtual = parseDate(snapshotMeta?.snapshot_atual);
+  if (snapshotAtual instanceof Date && !isNaN(snapshotAtual)) {
+    return formatDate(snapshotAtual);
+  }
+
   const candidates = [
-    snapshotMeta?.snapshot_atual,
     snapshotMeta?.snapshot_anterior,
     snapshotMeta?.snapshot_primeiro,
   ]

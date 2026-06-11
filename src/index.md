@@ -168,8 +168,12 @@ const rawData = rawDataParsed.map(d => {
 const secretarias = [...new Set(rawData.map(d => d.secretaria).filter(Boolean))].sort();
 
 function maxSnapshotDateLabel(snapshotMeta) {
+  const snapshotAtual = parseDate(snapshotMeta?.snapshot_atual);
+  if (snapshotAtual instanceof Date && !isNaN(snapshotAtual)) {
+    return formatDate(snapshotAtual);
+  }
+
   const candidates = [
-    snapshotMeta?.snapshot_atual,
     snapshotMeta?.snapshot_anterior,
     snapshotMeta?.snapshot_primeiro,
   ]
