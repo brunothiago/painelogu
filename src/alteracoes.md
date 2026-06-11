@@ -1,5 +1,5 @@
 ---
-title: Alterações — Painel PC 32
+title: Alterações — Painel OGU
 toc: false
 ---
 
