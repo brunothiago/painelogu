@@ -87,6 +87,6 @@ DATA_REF="$(
 )"
 
 git add "${DATA_PATHS[@]}"
-git commit -m "Atualiza dados PC 32 — $DATA_REF"
+git commit -m "Atualiza dados painelogu — $DATA_REF"
 git push
 log "Commit e push realizados — data de referência: $DATA_REF"

@@ -4,7 +4,12 @@
 
 Este repositório publica um painel estático em Observable Framework para acompanhamento dos contratos da Portaria Conjunta 32 do Novo PAC Seleção.
 
-Publicação: GitHub Pages em `https://brunothiago.github.io/painelogu/`
+Publicação:
+
+- Domínio principal: `http://thiagobruno.com.br/painelogu/`
+- GitHub Pages: `https://brunothiago.github.io/painelogu/`
+
+Repositório: `https://github.com/brunothiago/painelogu`
 
 O projeto tem dois blocos:
 
