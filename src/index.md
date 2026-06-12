@@ -1899,7 +1899,8 @@ if (prazoVencidoArr.length > 0 || prox10Arr.length > 0) {
 <div class="table-shell table-shell--terminal">
 
 ```js
-const hasCascadeSelection = Object.values(selectedCascade ?? {}).some(Boolean);
+const hasCascadeSelection = Object.values(selectedCascade ?? {})
+  .some(v => Array.isArray(v) ? v.length > 0 : Boolean(v));
 const selectedLicitacao = selectedLicitacaoState?.flow ?? {};
 const selectedCasaCivil = selectedLicitacaoState?.casaCivil ?? null;
 const hasLicitacaoSelection = Object.values(selectedLicitacao).some(Boolean) || selectedCasaCivil != null;

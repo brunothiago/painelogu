@@ -37,8 +37,20 @@ function urgencyColorForMonth(sortKey) {
   return URGENCIA_CORES["Mais de 90 dias"];
 }
 
+function urgencyColorForLabel(label) {
+  if (label == null || label === "Sem data") return URGENCIA_CORES["Sem data"];
+  const match = /^(\d{2})\/(\d{4})$/.exec(label);
+  if (!match) return URGENCIA_CORES["Sem data"];
+  const sortKey = Number(match[2]) * 100 + Number(match[1]);
+  return urgencyColorForMonth(sortKey);
+}
+
+function hasAnySelection(value) {
+  return Object.values(value).some((v) => (Array.isArray(v) ? v.length > 0 : Boolean(v)));
+}
+
 function buildVencimentoMonthChart(rows, options = {}) {
-  const {fromTable = false} = options;
+  const {fromTable = false, selectedMonths = [], onToggleMonth = null} = options;
   const counts = new Map();
   let semData = 0;
   for (const row of rows) {
@@ -116,10 +128,26 @@ function buildVencimentoMonthChart(rows, options = {}) {
             dy: -6,
             fontSize: 11,
             fill: "#5b6470",
+            pointerEvents: "none",
           }),
         ],
       })
     );
+
+    if (onToggleMonth) {
+      const rects = Array.from(scroll.querySelectorAll("g[aria-label='bar'] rect"));
+      rects.forEach((r, i) => {
+        const item = byMonth[i];
+        if (!item) return;
+        const selected = selectedMonths.includes(item.label);
+        r.style.cursor = "pointer";
+        r.style.opacity = selectedMonths.length === 0 || selected ? "1" : "0.25";
+        r.addEventListener("click", (event) => {
+          event.stopPropagation();
+          onToggleMonth(item.label);
+        });
+      });
+    }
   }
 
   wrap.append(scroll);
@@ -247,27 +275,35 @@ function styleActiveChip(chip, color) {
 }
 
 function activeSelection(values, colorByKey, onClear) {
-  const entries = Object.entries(values).filter(([, value]) => value != null);
-  if (entries.length === 0) return null;
-
   const labels = {
     suspensiva: "Situação",
     urgencia: "Urgência",
+    mesVencimento: "Vencimento",
   };
 
-  const wrap = el("div", "casc-active");
-  for (const [key, value] of entries) {
-    const chip = el("button", "casc-active__chip");
-    chip.type = "button";
-    chip.textContent = `${labels[key] ?? key}: ${value} ×`;
-    styleActiveChip(chip, colorByKey[key]?.(value) ?? PALETTE.blue);
-    chip.addEventListener("click", () => onClear(key));
-    wrap.append(chip);
+  const chips = [];
+  for (const [key, value] of Object.entries(values)) {
+    if (value == null) continue;
+    const items = Array.isArray(value) ? value : [value];
+    for (const item of items) {
+      if (item == null) continue;
+      const chip = el("button", "casc-active__chip");
+      chip.type = "button";
+      chip.textContent = `${labels[key] ?? key}: ${item} ×`;
+      styleActiveChip(chip, colorByKey[key]?.(item) ?? PALETTE.blue);
+      chip.addEventListener("click", () => onClear(key, item));
+      chips.push(chip);
+    }
   }
+  if (chips.length === 0) return null;
+
+  const wrap = el("div", "casc-active");
+  wrap.append(...chips);
   return wrap;
 }
 
 export function matchesCascadeSelection(d, selection = {}) {
+  const months = selection.mesVencimento;
   return (
     d.situacao === "Contratado - Suspensiva" &&
     (selection.suspensiva == null || d.situacao_suspensiva === selection.suspensiva) &&
@@ -276,6 +312,13 @@ export function matchesCascadeSelection(d, selection = {}) {
       (
         !d.dt_retirada_suspensiva &&
         d.urgencia_suspensiva === selection.urgencia
+      )
+    ) &&
+    (
+      !months || months.length === 0 ||
+      (
+        isSuspensivaPendente(d) &&
+        months.includes(monthYearLabel(monthYearKey(d.dt_vencimento_suspensiva)))
       )
     )
   );
@@ -287,7 +330,7 @@ export function matchesCascadeSelection(d, selection = {}) {
  */
 export function cascadeChart(data, tableRowsRef = null) {
   const container = Object.assign(el("div", "casc-chart"), {
-    value: {suspensiva: null, urgencia: null}
+    value: {suspensiva: null, urgencia: null, mesVencimento: []}
   });
 
   if (tableRowsRef) {
@@ -295,6 +338,7 @@ export function cascadeChart(data, tableRowsRef = null) {
   }
 
   function monthChartRows(pendentes) {
+    if (container.value.mesVencimento?.length) return pendentes;
     const tableRows = tableRowsRef?.value;
     if (tableRows == null) return pendentes;
     const visible = new Set(tableRows);
@@ -311,12 +355,20 @@ export function cascadeChart(data, tableRowsRef = null) {
     container.dispatchEvent(new Event("input", {bubbles: true}));
   }
 
+  function toggleMonth(label) {
+    const cur = container.value.mesVencimento ?? [];
+    const next = cur.includes(label) ? cur.filter((m) => m !== label) : [...cur, label];
+    container.value = {...container.value, mesVencimento: next};
+    render();
+    container.dispatchEvent(new Event("input", {bubbles: true}));
+  }
+
   const clear = el("button", "casc-clear");
   clear.type = "button";
   clear.textContent = "Limpar seleção";
   clear.hidden = true;
   clear.addEventListener("click", () => {
-    container.value = {suspensiva: null, urgencia: null};
+    container.value = {suspensiva: null, urgencia: null, mesVencimento: []};
     render();
     container.dispatchEvent(new Event("input", {bubbles: true}));
   });
@@ -324,15 +376,20 @@ export function cascadeChart(data, tableRowsRef = null) {
   function render() {
     container.querySelectorAll(".casc-month-chart").forEach((node) => node._cleanup?.());
     container.innerHTML = "";
-    clear.hidden = !Object.values(container.value).some(Boolean);
+    clear.hidden = !hasAnySelection(container.value);
     container.append(clear);
     const active = activeSelection(
       container.value,
       {
         suspensiva: (value) => SUSPENSIVA_CORES[value] ?? PALETTE.orange,
         urgencia: (value) => URGENCIA_CORES[value] ?? PALETTE.gold,
+        mesVencimento: (value) => urgencyColorForLabel(value),
       },
-      (key) => {
+      (key, value) => {
+        if (key === "mesVencimento") {
+          toggleMonth(value);
+          return;
+        }
         container.value = {...container.value, [key]: null};
         render();
         container.dispatchEvent(new Event("input", {bubbles: true}));
@@ -340,7 +397,11 @@ export function cascadeChart(data, tableRowsRef = null) {
     );
     if (active) container.append(active);
 
-    const filteredData = data.filter((d) => matchesCascadeSelection(d, container.value));
+    const cascadeSelection = {
+      suspensiva: container.value.suspensiva,
+      urgencia: container.value.urgencia,
+    };
+    const filteredData = data.filter((d) => matchesCascadeSelection(d, cascadeSelection));
     const totalN1 = filteredData.length;
 
     if (totalN1 === 0) {
@@ -401,7 +462,11 @@ export function cascadeChart(data, tableRowsRef = null) {
       const monthRows = monthChartRows(pendentes);
       const tableFiltered = tableRowsRef?.value != null && monthRows.length !== pendentes.length;
       container.append(connector("calendário de vencimento da suspensiva (PBI)"));
-      container.append(buildVencimentoMonthChart(monthRows, {fromTable: tableFiltered}));
+      container.append(buildVencimentoMonthChart(monthRows, {
+        fromTable: tableFiltered,
+        selectedMonths: container.value.mesVencimento ?? [],
+        onToggleMonth: toggleMonth,
+      }));
     }
   }
 
