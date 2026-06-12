@@ -44,10 +44,6 @@ data/            # Histórico de snapshots e relatórios diff
 .github/         # Deploy GitHub Pages
 ```
 
-## Repositórios legados
-
-Os repositórios `painel_pc32_cgpac` e `painel_pc_32_cgpac` foram **arquivados**. Este repositório (`painelogu`) é o único ativo.
-
 ## Licença
 
 Uso interno DMP/MCid. Dados sujeitos às políticas das fontes oficiais (TransfereGov, bases internas).
