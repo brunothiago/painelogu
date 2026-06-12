@@ -3900,6 +3900,8 @@ body {
 .casc-chart {
     display: grid;
     gap: 0;
+    width: 100%;
+    min-width: 0;
 }
 
 .casc-clear {
@@ -3974,6 +3976,8 @@ body {
 .casc-month-chart {
     display: grid;
     gap: 0.55rem;
+    width: 100%;
+    min-width: 0;
     padding: 1.1rem 1.2rem;
     background: rgba(255,255,255,0.96);
     border: 1px solid rgba(215,210,199,0.9);
@@ -3983,7 +3987,14 @@ body {
 
 .casc-month-chart__scroll {
     overflow-x: auto;
+    width: 100%;
+    min-width: 0;
     padding-bottom: 0.25rem;
+}
+
+.casc-month-chart__scroll svg {
+    display: block;
+    max-width: none;
 }
 
 .casc-bar {

@@ -87,35 +87,48 @@ function buildVencimentoMonthChart(rows, options = {}) {
   }
 
   const scroll = el("div", "casc-month-chart__scroll");
-  scroll.append(
-    Plot.plot({
-      width: Math.max(420, byMonth.length * 52 + 48),
-      height: 260,
-      marginLeft: 48,
-      marginRight: 16,
-      marginBottom: 56,
-      marginTop: 12,
-      style: {fontFamily: "var(--font-sans, IBM Plex Sans, sans-serif)", fontSize: 12},
-      x: {
-        label: null,
-        domain: byMonth.map((d) => d.label),
-        tickRotate: -40,
-      },
-      y: {label: "Contratos", grid: true, nice: true},
-      marks: [
-        Plot.barY(byMonth, {x: "label", y: "qtd", fill: "color", rx: 4}),
-        Plot.text(byMonth, {
-          x: "label",
-          y: "qtd",
-          text: (d) => (d.qtd > 0 ? d.qtd.toLocaleString("pt-BR") : ""),
-          dy: -6,
-          fontSize: 11,
-          fill: "#5b6470",
-        }),
-      ],
-    })
-  );
+  const minPlotWidth = byMonth.length * 52 + 48;
+
+  function renderPlot() {
+    const containerWidth = scroll.clientWidth;
+    const width = Math.max(containerWidth > 0 ? containerWidth : 420, minPlotWidth);
+    scroll.replaceChildren(
+      Plot.plot({
+        width,
+        height: 260,
+        marginLeft: 48,
+        marginRight: 16,
+        marginBottom: 56,
+        marginTop: 12,
+        style: {fontFamily: "var(--font-sans, IBM Plex Sans, sans-serif)", fontSize: 12},
+        x: {
+          label: null,
+          domain: byMonth.map((d) => d.label),
+          tickRotate: -40,
+        },
+        y: {label: "Contratos", grid: true, nice: true},
+        marks: [
+          Plot.barY(byMonth, {x: "label", y: "qtd", fill: "color", rx: 4}),
+          Plot.text(byMonth, {
+            x: "label",
+            y: "qtd",
+            text: (d) => (d.qtd > 0 ? d.qtd.toLocaleString("pt-BR") : ""),
+            dy: -6,
+            fontSize: 11,
+            fill: "#5b6470",
+          }),
+        ],
+      })
+    );
+  }
+
   wrap.append(scroll);
+
+  const resizeObserver = new ResizeObserver(() => renderPlot());
+  resizeObserver.observe(scroll);
+  wrap._cleanup = () => resizeObserver.disconnect();
+
+  requestAnimationFrame(() => renderPlot());
   return wrap;
 }
 
@@ -309,6 +322,7 @@ export function cascadeChart(data, tableRowsRef = null) {
   });
 
   function render() {
+    container.querySelectorAll(".casc-month-chart").forEach((node) => node._cleanup?.());
     container.innerHTML = "";
     clear.hidden = !Object.values(container.value).some(Boolean);
     container.append(clear);
