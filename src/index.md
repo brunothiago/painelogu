@@ -60,7 +60,7 @@ function docsSuspensivaPendentes(d) {
 }
 
 function parseBaseRow(d) {
-  const dt_assinatura = parseDate(pickField(d, "dte_assinatura_contrato_tci", "dte_assinatura_contrato"));
+  const dt_assinatura = parseDate(pickField(d, "dte_assinatura_contrato_saci", "dte_assinatura_contrato_tci", "dte_assinatura_contrato"));
   const dt_lae = parseDate(pickField(d, "dte_primeira_data_lae_tdb", "dte_primeira_data_lae"));
   const dt_lae_mais_60 =
     parseDate(pickField(d, "prazo_lae_mais_60_calc")) ?? (dt_lae ? addCalendarDays(dt_lae, 120) : null);
@@ -69,19 +69,19 @@ function parseBaseRow(d) {
     (dt_lae_mais_60 ? addCalendarDays(addCalendarDays(dt_lae_mais_60, 120), 60) : null);
 
   const row = {
-  cod_tci: pickField(d, "cod_tci_tci", "cod_tci"),
-  num_convenio: pickField(d, "num_convenio_tci", "num_convenio"),
-  uf: pickField(d, "txt_uf_tci", "txt_uf"),
-  regiao: pickField(d, "txt_regiao_tci", "txt_regiao"),
-  cod_ibge: pickField(d, "cod_ibge_7dig_tci", "cod_ibge_7dig"),
-  municipio: pickField(d, "txt_municipio_tci", "txt_municipio"),
-  proponente: pickField(d, "txt_tomador_tci", "txt_tomador"),
-  objeto: pickField(d, "dsc_objeto_instrumento_tci", "dsc_objeto_instrumento"),
-  secretaria: pickField(d, "txt_sigla_secretaria_tci", "txt_sigla_secretaria"),
-  fase: pickField(d, "dsc_fase_pac_tci", "dsc_fase_pac"),
-  modalidade: pickField(d, "txt_modalidade_tci", "txt_modalidade"),
-  situacao_contrato_tci: pickField(d, "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
-  situacao: pickField(d, "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
+  cod_tci: pickField(d, "cod_tci_saci", "cod_tci_tci", "cod_saci", "cod_tci"),
+  num_convenio: pickField(d, "num_convenio_saci", "num_convenio_tci", "num_convenio"),
+  uf: pickField(d, "txt_uf_saci", "txt_uf_tci", "txt_uf"),
+  regiao: pickField(d, "txt_regiao_saci", "txt_regiao_tci", "txt_regiao"),
+  cod_ibge: pickField(d, "cod_ibge_7dig_saci", "cod_ibge_7dig_tci", "cod_ibge_7dig"),
+  municipio: pickField(d, "txt_municipio_saci", "txt_municipio_tci", "txt_municipio"),
+  proponente: pickField(d, "txt_tomador_saci", "txt_tomador_tci", "txt_tomador"),
+  objeto: pickField(d, "dsc_objeto_instrumento_saci", "dsc_objeto_instrumento_tci", "dsc_objeto_instrumento"),
+  secretaria: pickField(d, "txt_sigla_secretaria_saci", "txt_sigla_secretaria_tci", "txt_sigla_secretaria"),
+  fase: pickField(d, "dsc_fase_pac_saci", "dsc_fase_pac_tci", "dsc_fase_pac"),
+  modalidade: pickField(d, "txt_modalidade_saci", "txt_modalidade_tci", "txt_modalidade"),
+  situacao_contrato_tci: pickField(d, "dsc_situacao_contrato_mcid_saci", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
+  situacao: pickField(d, "dsc_situacao_contrato_mcid_saci", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
   dt_assinatura,
   situacao_suspensiva: pickField(d, "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
   situacao_suspensiva_pbi: pickField(d, "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
@@ -97,8 +97,8 @@ function parseBaseRow(d) {
   dt_homolog_licitacao: parseDate(pickField(d, "dte_homologacao_licitacao_tgov", "dte_homologacao_licitacao")),
   dt_vrpl: parseDate(pickField(d, "dte_vrpl_tdb", "dte_vrpl")),
   dt_aio: parseDate(pickField(d, "dte_aio_tdb", "dte_aio")),
-  dt_inicio_obra: parseDate(pickField(d, "dte_inicio_obra_mcid_tci", "dte_inicio_obra_mcid")),
-  vlr_repasse: +pickField(d, "vlr_repasse_tci", "vlr_repasse") || 0,
+  dt_inicio_obra: parseDate(pickField(d, "dte_inicio_obra_mcid_saci", "dte_inicio_obra_mcid_tci", "dte_inicio_obra_mcid")),
+  vlr_repasse: +pickField(d, "vlr_repasse_saci", "vlr_repasse_tci", "vlr_repasse") || 0,
   status_suspensiva: pickField(d, "status_suspensiva_calc", "status_suspensiva"),
   flag_publicacao_licitacao: pickField(d, "flag_publicacao_licitacao_calc", "flag_publicacao_licitacao"),
   flag_homologacao_licitacao: pickField(d, "flag_homologacao_licitacao_calc", "flag_homologacao_licitacao"),
@@ -413,9 +413,9 @@ display(pageTitleBar);
 
 ```js
 const fConvenioInput = Inputs.search(rawData, {
-  placeholder: "Buscar por num. convênio ou TCI…",
+  placeholder: "Buscar por num. convênio ou SACI…",
   columns: ["num_convenio", "cod_tci", "proponente"],
-  label: "Convênio / TCI / Proponente",
+  label: "Convênio / SACI / Proponente",
 });
 
 function localizeSearchResults(input) {
@@ -872,7 +872,7 @@ function makeCrossFilteredCharts(data, previousBaseData, drillField, drillLabel,
     const sitCard = document.createElement("div");
     sitCard.className = "card";
     sitCard.innerHTML = `
-      <h2>Situação do Contrato (TCI) <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Classificação da situação contratual conforme a origem (TCI/MCID).<ul><li><strong>Em Contratação</strong> — instrumento ainda não formalizado</li><li><strong>Contratado - Suspensiva</strong> — contrato assinado com condição suspensiva pendente</li><li><strong>Contratado - Normal</strong> — contrato ativo sem restrições</li><li><strong>Cancelado ou Distratado</strong> — contrato encerrado</li><li><strong>Contratado - Em Prestação de Contas</strong> — contrato em fase de prestação de contas</li></ul></span></span></h2>
+      <h2>Situação do Contrato (SACI) <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Classificação da situação contratual conforme a origem (SACI/MCID).<ul><li><strong>Em Contratação</strong> — instrumento ainda não formalizado</li><li><strong>Contratado - Suspensiva</strong> — contrato assinado com condição suspensiva pendente</li><li><strong>Contratado - Normal</strong> — contrato ativo sem restrições</li><li><strong>Cancelado ou Distratado</strong> — contrato encerrado</li><li><strong>Contratado - Em Prestação de Contas</strong> — contrato em fase de prestação de contas</li></ul></span></span></h2>
       <p>Clique em uma barra para filtrar</p>
     `;
     const sitChart = makeClickableChart(
@@ -1828,7 +1828,7 @@ const selectedDocSuspensiva = view(docPendInput);
 <section class="section-block section-block--licitacao">
 <header class="section-block__header">
 <span class="section-block__eyebrow">Marco licitatório</span>
-<h2>Análise de Licitação <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Monitoramento dos prazos de licitação para contratos com situação de contrato (TCI) igual a <strong>Contratado - Normal</strong>.<ul><li><strong>Base do bloco</strong> — considera apenas contratos em <strong>Contratado - Normal</strong></li><li><strong>Exceção PC 72</strong> — contratos assinados antes de <strong>21/10/2025</strong> aparecem como <strong>Sem prazo (PC 72)</strong> na publicação</li><li><strong>Sem prazo calculado</strong> — contratos sem publicação e sem classificação de prazo calculada na base</li><li><strong>Prazo de publicação</strong> — até 120 dias corridos conforme a regra calculada da base, exceto os casos da PC 72</li><li><strong>Prazo de homologação</strong> — até 120 dias corridos após a publicação da licitação</li><li><strong>Regra Casa Civil</strong> — publicação, homologação e ordem de serviço devem ocorrer até 01/06/2026</li></ul>Classificação de prazo:<ul><li><strong>Vencida</strong> — prazo já expirou</li><li><strong>Próximos 30 dias</strong> — vence em até 30 dias</li><li><strong>No prazo</strong> — mais de 30 dias restantes</li><li><strong>Sem prazo (PC 72)</strong> — assinatura anterior a 21/10/2025</li><li><strong>Sem prazo calculado</strong> — sem status calculado na base</li></ul></span></span></h2>
+<h2>Análise de Licitação <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Monitoramento dos prazos de licitação para contratos com situação de contrato (SACI) igual a <strong>Contratado - Normal</strong>.<ul><li><strong>Base do bloco</strong> — considera apenas contratos em <strong>Contratado - Normal</strong></li><li><strong>Exceção PC 72</strong> — contratos assinados antes de <strong>21/10/2025</strong> aparecem como <strong>Sem prazo (PC 72)</strong> na publicação</li><li><strong>Sem prazo calculado</strong> — contratos sem publicação e sem classificação de prazo calculada na base</li><li><strong>Prazo de publicação</strong> — até 120 dias corridos conforme a regra calculada da base, exceto os casos da PC 72</li><li><strong>Prazo de homologação</strong> — até 120 dias corridos após a publicação da licitação</li><li><strong>Regra Casa Civil</strong> — publicação, homologação e ordem de serviço devem ocorrer até 01/06/2026</li></ul>Classificação de prazo:<ul><li><strong>Vencida</strong> — prazo já expirou</li><li><strong>Próximos 30 dias</strong> — vence em até 30 dias</li><li><strong>No prazo</strong> — mais de 30 dias restantes</li><li><strong>Sem prazo (PC 72)</strong> — assinatura anterior a 21/10/2025</li><li><strong>Sem prazo calculado</strong> — sem status calculado na base</li></ul></span></span></h2>
 <p>Prazos de publicação e homologação para contratos em <strong>Contratado - Normal</strong>, incluindo a exceção da PC 72.</p>
 </header>
 
@@ -2005,21 +2005,21 @@ const exportColumns = [
 const exportHeaders = {
   _diff_label: "Alteração",
   num_convenio: "Convênio",
-  cod_tci: "TCI",
+  cod_tci: "SACI",
   secretaria: "Secretaria",
   regiao: "Região",
   uf: "UF",
   municipio: "Município",
-  proponente: "Proponente (TCI)",
+  proponente: "Proponente (SACI)",
   fase: "Fase",
   modalidade: "Modalidade",
-  situacao_contrato_tci: "Situação Contrato (TCI)",
+  situacao_contrato_tci: "Situação Contrato (SACI)",
   situacao_suspensiva_pbi: "Situação Suspensiva (PBI)",
   dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)",
   mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Suspensiva",
   dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
   perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
-  dt_assinatura: "Assinatura (TCI)",
+  dt_assinatura: "Assinatura (SACI)",
   dt_lae: "LAE (TDB)",
   dt_lae_mais_60: "Publ. Licit. = LAE + 60d +60d (CALC)",
   dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60d +60d)+ 120 + 60 (CALC)",
@@ -2035,8 +2035,8 @@ const exportHeaders = {
   dt_aio: "AIO (TDB)",
   prazo_inicio_obra: "Prazo Início Obra (CALC)",
   status_inicio_obra: "Status Início Obra (CALC)",
-  dt_inicio_obra: "Início Obra (TCI)",
-  vlr_repasse: "Repasse (TCI)",
+  dt_inicio_obra: "Início Obra (SACI)",
+  vlr_repasse: "Repasse (SACI)",
   tipo_doc_suspensiva: "Tipo Doc. Suspensiva",
   docs_suspensiva_resumo: "Documentos Pendentes (Suspensiva)",
   doc_titularidade: "Doc.: Titularidade",
@@ -2167,7 +2167,7 @@ const tciLinkCol = d => d
   : "—";
 
 const diffFieldLabels = {
-  situacao: "Situação", situacao_contrato_tci: "Sit. Contrato TCI", situacao_suspensiva_pbi: "Sit. Suspensiva PBI", status_suspensiva: "Status Suspensiva",
+  situacao: "Situação", situacao_contrato_tci: "Sit. Contrato SACI", situacao_suspensiva_pbi: "Sit. Suspensiva PBI", status_suspensiva: "Status Suspensiva",
   fase_atual: "Fase Atual", dt_retirada_suspensiva: "Ret. Suspensiva", dt_lae: "LAE",
   dt_pub_licitacao: "Pub. Licitação", dt_homolog_licitacao: "Homolog.", dt_vrpl: "VRPL",
   dt_aio: "AIO", dt_inicio_obra: "Início Obra", vlr_repasse: "Repasse",
@@ -2187,17 +2187,17 @@ display(renderBaseDataTable({
   rows: tableData,
   columns: activeColumns,
   headers: {
-    _diff_label: "Alteração", num_convenio: "Convênio", cod_tci: "TCI", secretaria: "Secretaria",
-    regiao: "Região", uf: "UF", municipio: "Município", proponente: "Proponente (TCI)",
-    fase: "Fase", modalidade: "Modalidade", situacao_contrato_tci: "Situação Contrato (TCI)",
+    _diff_label: "Alteração", num_convenio: "Convênio", cod_tci: "SACI", secretaria: "Secretaria",
+    regiao: "Região", uf: "UF", municipio: "Município", proponente: "Proponente (SACI)",
+    fase: "Fase", modalidade: "Modalidade", situacao_contrato_tci: "Situação Contrato (SACI)",
     situacao_suspensiva_pbi: "Situação Suspensiva (PBI)",
     dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)", mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Susp.", dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
     perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
-    dt_assinatura: "Assinatura (TCI)", dt_lae: "LAE (TDB)", dt_lae_mais_60: "Publ. Licit. = LAE + 60d +60d (CALC)", dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60d +60d)+ 120 + 60 (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
+    dt_assinatura: "Assinatura (SACI)", dt_lae: "LAE (TDB)", dt_lae_mais_60: "Publ. Licit. = LAE + 60d +60d (CALC)", dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60d +60d)+ 120 + 60 (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
     status_pub_licitacao: "Status Publicação (CALC)", dt_pub_licitacao: "Pub. Licitação (TGOV)",
     prazo_homolog_licitacao: "Prazo Homolog. (CALC)", status_homolog_licitacao: "Status Homolog. (CALC)",
     dt_homolog_licitacao: "Homolog. Licitação (TGOV)", dt_vrpl: "VRPL (TDB)", dt_aio: "AIO (TDB)", prazo_inicio_obra: "Prazo Início Obra (CALC)", status_inicio_obra: "Status Início Obra (CALC)",
-    dt_inicio_obra: "Início Obra (TCI)", vlr_repasse: "Repasse (TCI)",
+    dt_inicio_obra: "Início Obra (SACI)", vlr_repasse: "Repasse (SACI)",
     tipo_doc_suspensiva: "Tipo Doc. Suspensiva", docs_suspensiva_resumo: "Documentos Pendentes (Suspensiva)",
     doc_titularidade: "Doc.: Titularidade", doc_viabilidade_terreno: "Doc.: Viabilidade do Terreno",
     doc_sondagem: "Doc.: Estudos de Sondagem", doc_orcamento: "Doc.: Orçamento",

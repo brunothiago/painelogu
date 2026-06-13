@@ -12,7 +12,7 @@ import {formatNumber} from "./lib/formatters.js";
 
 const docRawText = await FileAttachment("data/doc_suspensivas.csv").text();
 const dsv = dsvFormat(";");
-const docRows = dsv.parse(docRawText, (d) => ({...d}));
+const docRows = dsv.parse(docRawText, (d) => ({...d, cod_saci: d.cod_saci ?? d.cod_tci}));
 ```
 
 ```js
@@ -46,7 +46,7 @@ display(metricGrid([
 
 ```js
 const docColumns = [
-  "tipo_doc_suspensiva", "consta_base_pc32", "instrumento", "cod_tci", "recebedor", "uf", "municipio_beneficiado",
+  "tipo_doc_suspensiva", "consta_base_pc32", "instrumento", "cod_saci", "recebedor", "uf", "municipio_beneficiado",
   "programa", "valor_repasse", "situacao_da_analise",
   "doc_titularidade", "doc_viabilidade_terreno", "doc_sondagem", "doc_orcamento",
   "doc_projetos_implantacao", "doc_projetos_complementares", "doc_ambiental",
@@ -57,7 +57,7 @@ const docHeaders = {
   tipo_doc_suspensiva: "Tipo",
   consta_base_pc32: "Consta na base ativa",
   instrumento: "Instrumento",
-  cod_tci: "TCI",
+  cod_saci: "SACI",
   recebedor: "Recebedor",
   uf: "UF",
   municipio_beneficiado: "Município",
@@ -93,7 +93,7 @@ if (docRows.length > 0) {
     rows: docRows,
     columns: docColumns,
     headers: docHeaders,
-    formatters: { valor_repasse: moneyCol, cod_tci: tciLinkCol },
+    formatters: { valor_repasse: moneyCol, cod_saci: tciLinkCol },
     invalidation,
     exportFilePrefix: "doc-suspensivas",
   }));

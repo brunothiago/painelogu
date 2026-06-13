@@ -19,7 +19,7 @@ function parseChangeRow(d) {
     data: parseDate(d.data),
     categoria: d.categoria,
     natureza: d.natureza,
-    cod_tci: d.cod_tci,
+    cod_tci: d.cod_saci ?? d.cod_tci,
     num_convenio: d.num_convenio,
     uf: d.uf,
     secretaria: d.secretaria,
@@ -33,7 +33,8 @@ function parseChangeRow(d) {
 const rawChanges = dsv.parse(changesRawText, parseChangeRow);
 
 const diffFieldLabels = {
-  dsc_situacao_contrato_mcid_tci: "Situação Contrato (TCI)",
+  dsc_situacao_contrato_mcid_saci: "Situação Contrato (SACI)",
+  dsc_situacao_contrato_mcid_tci: "Situação Contrato (SACI)",
   situacao_da_analise_suspensiva_pbi: "Situação Suspensiva (PBI)",
   situacao_contrato_dmp: "Situação Contrato (DMP)",
   situacao_da_analise_suspensiva_dmp: "Situação Suspensiva (DMP)",
@@ -48,8 +49,10 @@ const diffFieldLabels = {
   dte_homologacao_licitacao_tgov: "Homolog. Licitação (TGOV)",
   dte_vrpl_tdb: "VRPL (TDB)",
   dte_aio_tdb: "AIO (TDB)",
-  dte_inicio_obra_mcid_tci: "Início Obra (TCI)",
-  vlr_repasse_tci: "Repasse (TCI)",
+  dte_inicio_obra_mcid_saci: "Início Obra (SACI)",
+  dte_inicio_obra_mcid_tci: "Início Obra (SACI)",
+  vlr_repasse_saci: "Repasse (SACI)",
+  vlr_repasse_tci: "Repasse (SACI)",
   prazo_pub_licitacao_calc: "Prazo Publicação (CALC)",
   prazo_homolog_licitacao_calc: "Prazo Homolog. (CALC)",
   prazo_homolog_licitacao_120d: "Prazo Homolog. 120d",
@@ -73,7 +76,7 @@ function fmt(v, campo) {
   if (v == null || v === "") return "(vazio)";
   if (v instanceof Date) return formatDate(v);
   if (typeof v === "number") return v.toLocaleString("pt-BR");
-  if (campo === "vlr_repasse_tci" && v !== "" && !isNaN(v)) {
+  if ((campo === "vlr_repasse_saci" || campo === "vlr_repasse_tci") && v !== "" && !isNaN(v)) {
     return Number(v).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
   }
   return String(v);

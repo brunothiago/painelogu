@@ -5,7 +5,7 @@ import DataTable from "datatables.net-responsive-dt";
 const tableColumns = [
   {key: "data_fmt", label: "Data", filter: "text", className: "col-data"},
   {key: "num_convenio", label: "Convênio", filter: "text", className: "col-convenio"},
-  {key: "cod_tci", label: "TCI", filter: "text", className: "col-tci"},
+  {key: "cod_tci", label: "SACI", filter: "text", className: "col-tci"},
   {key: "uf", label: "UF", filter: "select", className: "col-uf"},
   {key: "secretaria", label: "Secretaria", filter: "select", className: "col-secretaria"},
   {key: "tipo", label: "Tipo", filter: "select", className: "col-tipo"},
@@ -54,7 +54,7 @@ function exportAlteracoesRows(rows) {
   const exportRows = rows.map((row) => ({
     Data: row.data_fmt ?? "",
     Convênio: row.num_convenio ?? "",
-    TCI: row.cod_tci ?? "",
+    SACI: row.cod_tci ?? "",
     UF: row.uf ?? "",
     Secretaria: row.secretaria ?? "",
     Tipo: row.tipo ?? "",
@@ -125,7 +125,7 @@ export function renderAlteracoesDataTable(rows, invalidation) {
         },
       },
       {data: "num_convenio", title: "Convênio", className: "col-convenio", width: "96px"},
-      {data: "cod_tci", title: "TCI", className: "col-tci", width: "84px", render: tciLinkCell},
+      {data: "cod_tci", title: "SACI", className: "col-tci", width: "84px", render: tciLinkCell},
       {data: "uf", title: "UF", className: "col-uf", width: "48px"},
       {data: "secretaria", title: "Secretaria", className: "col-secretaria", width: "64px"},
       {data: "tipo", title: "Tipo", className: "col-tipo", width: "64px"},

@@ -81,7 +81,7 @@ function chooseFilterType(rows, column) {
 function getColumnClassName(column) {
   if (column === "_diff_label") return "col-diff";
   if (column === "num_convenio") return "col-convenio";
-  if (column === "cod_tci") return "col-tci";
+  if (column === "cod_tci" || column === "cod_saci") return "col-tci";
   if (column === "secretaria") return "col-secretaria";
   if (column.startsWith("dt_") || column.startsWith("prazo_") || column === "mes_ano_vencimento_suspensiva") return "col-date";
   if (column.startsWith("status_")) return "col-status";
@@ -101,7 +101,7 @@ function getColumnClassName(column) {
 function getColumnWidth(column) {
   if (column === "_diff_label") return "86px";
   if (column === "num_convenio") return "92px";
-  if (column === "cod_tci") return "96px";
+  if (column === "cod_tci" || column === "cod_saci") return "96px";
   if (column === "secretaria") return "68px";
   if (column === "uf") return "48px";
   if (column.startsWith("dt_") || column.startsWith("prazo_") || column === "mes_ano_vencimento_suspensiva") return "104px";

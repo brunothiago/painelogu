@@ -9,23 +9,23 @@ from pathlib import Path
 import shutil
 
 
-KEY_FIELD = "num_convenio_tci"
-FALLBACK_KEY_FIELD = "cod_tci_tci"
+KEY_FIELD = "num_convenio_saci"
+FALLBACK_KEY_FIELD = "cod_tci_saci"
 
 FIELD_ALIASES = {
-    "cod_tci": "cod_tci_tci",
-    "num_convenio": "num_convenio_tci",
-    "txt_uf": "txt_uf_tci",
-    "txt_regiao": "txt_regiao_tci",
-    "cod_ibge_7dig": "cod_ibge_7dig_tci",
-    "txt_municipio": "txt_municipio_tci",
-    "txt_tomador": "txt_tomador_tci",
-    "dsc_objeto_instrumento": "dsc_objeto_instrumento_tci",
-    "txt_sigla_secretaria": "txt_sigla_secretaria_tci",
-    "dsc_fase_pac": "dsc_fase_pac_tci",
-    "txt_modalidade": "txt_modalidade_tci",
-    "dsc_situacao_contrato_mcid": "dsc_situacao_contrato_mcid_tci",
-    "dte_assinatura_contrato": "dte_assinatura_contrato_tci",
+    "cod_saci": "cod_tci_saci",
+    "num_convenio": "num_convenio_saci",
+    "txt_uf": "txt_uf_saci",
+    "txt_regiao": "txt_regiao_saci",
+    "cod_ibge_7dig": "cod_ibge_7dig_saci",
+    "txt_municipio": "txt_municipio_saci",
+    "txt_tomador": "txt_tomador_saci",
+    "dsc_objeto_instrumento": "dsc_objeto_instrumento_saci",
+    "txt_sigla_secretaria": "txt_sigla_secretaria_saci",
+    "dsc_fase_pac": "dsc_fase_pac_saci",
+    "txt_modalidade": "txt_modalidade_saci",
+    "dsc_situacao_contrato_mcid": "dsc_situacao_contrato_mcid_saci",
+    "dte_assinatura_contrato": "dte_assinatura_contrato_saci",
     "situacao_da_analise_suspensiva": "situacao_da_analise_suspensiva_pbi",
     "motivo_suspensiva_retirada_cgpac": "motivo_suspensiva_retirada_dmp",
     "vencimento_da_suspensiva": "vencimento_da_suspensiva_pbi",
@@ -35,8 +35,8 @@ FIELD_ALIASES = {
     "dte_homologacao_licitacao": "dte_homologacao_licitacao_tgov",
     "dte_vrpl": "dte_vrpl_tdb",
     "dte_aio": "dte_aio_tdb",
-    "dte_inicio_obra_mcid": "dte_inicio_obra_mcid_tci",
-    "vlr_repasse": "vlr_repasse_tci",
+    "dte_inicio_obra_mcid": "dte_inicio_obra_mcid_saci",
+    "vlr_repasse": "vlr_repasse_saci",
     "status_suspensiva": "status_suspensiva_calc",
     "flag_publicacao_licitacao": "flag_publicacao_licitacao_calc",
     "flag_homologacao_licitacao": "flag_homologacao_licitacao_calc",
@@ -60,19 +60,19 @@ FIELD_ALIASES = {
 }
 
 SOURCE_FIELDS = {
-    "cod_tci_tci",
-    "num_convenio_tci",
-    "txt_uf_tci",
-    "txt_regiao_tci",
-    "cod_ibge_7dig_tci",
-    "txt_municipio_tci",
-    "txt_tomador_tci",
-    "dsc_objeto_instrumento_tci",
-    "txt_sigla_secretaria_tci",
-    "dsc_fase_pac_tci",
-    "txt_modalidade_tci",
-    "dsc_situacao_contrato_mcid_tci",
-    "dte_assinatura_contrato_tci",
+    "cod_tci_saci",
+    "num_convenio_saci",
+    "txt_uf_saci",
+    "txt_regiao_saci",
+    "cod_ibge_7dig_saci",
+    "txt_municipio_saci",
+    "txt_tomador_saci",
+    "dsc_objeto_instrumento_saci",
+    "txt_sigla_secretaria_saci",
+    "dsc_fase_pac_saci",
+    "txt_modalidade_saci",
+    "dsc_situacao_contrato_mcid_saci",
+    "dte_assinatura_contrato_saci",
     "situacao_da_analise_suspensiva_pbi",
     "vencimento_da_suspensiva_pbi",
     "dte_retirada_suspensiva_tgov",
@@ -81,8 +81,8 @@ SOURCE_FIELDS = {
     "dte_homologacao_licitacao_tgov",
     "dte_vrpl_tdb",
     "dte_aio_tdb",
-    "dte_inicio_obra_mcid_tci",
-    "vlr_repasse_tci",
+    "dte_inicio_obra_mcid_saci",
+    "vlr_repasse_saci",
     "motivo_suspensiva_retirada_dmp",
     "doc_titularidade",
     "doc_viabilidade_terreno",
@@ -157,14 +157,14 @@ def _read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
 
 
 def _row_key(row: dict[str, str]) -> str:
-    """Retorna num_convenio como chave; se vazio, usa cod_tci como fallback."""
+    """Retorna num_convenio como chave; se vazio, usa cod_saci como fallback."""
     key = (row.get(KEY_FIELD) or "").strip()
     if not key:
         key = (row.get("num_convenio") or "").strip()
     if not key:
         key = (row.get(FALLBACK_KEY_FIELD) or "").strip()
     if not key:
-        key = (row.get("cod_tci") or "").strip()
+        key = (row.get("cod_saci") or "").strip()
     return key
 
 
@@ -196,7 +196,12 @@ def _normalize(value: str | None) -> str:
 
 
 def _canonical_field_name(field: str) -> str:
-    return FIELD_ALIASES.get(field, field)
+    field = FIELD_ALIASES.get(field, field)
+    # Compatibilidade de transição: snapshots antigos usavam o sufixo _tci
+    # (nomenclatura antiga da carteira); hoje é _saci. Normaliza para o novo.
+    if field.endswith("_tci"):
+        field = field[:-4] + "_saci"
+    return field
 
 
 def _canonicalize_header(header: list[str]) -> list[str]:
@@ -258,9 +263,9 @@ def _should_ignore_field_change(field: str, previous_value: str, current_value: 
 def _row_metadata(row: dict[str, str], key: str) -> dict[str, str]:
     return {
         "num_convenio": _normalize(row.get(KEY_FIELD)) or key,
-        "cod_tci": _normalize(row.get(FALLBACK_KEY_FIELD)),
-        "uf": _normalize(row.get("txt_uf_tci")),
-        "secretaria": _normalize(row.get("txt_sigla_secretaria_tci")),
+        "cod_saci": _normalize(row.get(FALLBACK_KEY_FIELD)),
+        "uf": _normalize(row.get("txt_uf_saci")),
+        "secretaria": _normalize(row.get("txt_sigla_secretaria_saci")),
     }
 
 
@@ -337,10 +342,10 @@ def _build_detail_rows(
                 "categoria_alteracao": "novo_registro",
                 "natureza_campo": "novo_registro",
                 "num_convenio": metadata["num_convenio"],
-                "cod_tci": metadata["cod_tci"],
-                "campo": "vlr_repasse_tci",
+                "cod_saci": metadata["cod_saci"],
+                "campo": "vlr_repasse_saci",
                 "valor_anterior": "",
-                "valor_atual": _normalize(row.get("vlr_repasse_tci")),
+                "valor_atual": _normalize(row.get("vlr_repasse_saci")),
             }
         )
 
@@ -354,9 +359,9 @@ def _build_detail_rows(
                 "categoria_alteracao": "registro_removido",
                 "natureza_campo": "registro_removido",
                 "num_convenio": metadata["num_convenio"],
-                "cod_tci": metadata["cod_tci"],
-                "campo": "vlr_repasse_tci",
-                "valor_anterior": _normalize(row.get("vlr_repasse_tci")),
+                "cod_saci": metadata["cod_saci"],
+                "campo": "vlr_repasse_saci",
+                "valor_anterior": _normalize(row.get("vlr_repasse_saci")),
                 "valor_atual": "",
             }
         )
@@ -388,8 +393,8 @@ def _build_detail_rows(
             stats["changed_data_records"] += 1
 
         metadata = _row_metadata(current, key)
-        if not metadata["cod_tci"]:
-            metadata["cod_tci"] = _row_metadata(previous, key)["cod_tci"]
+        if not metadata["cod_saci"]:
+            metadata["cod_saci"] = _row_metadata(previous, key)["cod_saci"]
         for field in changed_fields:
             detail_rows.append(
                 {
@@ -397,7 +402,7 @@ def _build_detail_rows(
                     "categoria_alteracao": category,
                     "natureza_campo": _field_nature(field, "alterado"),
                     "num_convenio": metadata["num_convenio"],
-                    "cod_tci": metadata["cod_tci"],
+                    "cod_saci": metadata["cod_saci"],
                     "campo": field,
                     "valor_anterior": _normalize(previous.get(field)),
                     "valor_atual": _normalize(current.get(field)),
@@ -440,12 +445,12 @@ def _build_cumulative_diff(history_dir: Path) -> list[dict[str, str]]:
                 "categoria": "novo_registro",
                 "natureza": "novo_registro",
                 "num_convenio": metadata["num_convenio"],
-                "cod_tci": metadata["cod_tci"],
+                "cod_saci": metadata["cod_saci"],
                 "uf": metadata["uf"],
                 "secretaria": metadata["secretaria"],
-                "campo": "vlr_repasse_tci",
+                "campo": "vlr_repasse_saci",
                 "valor_anterior": "",
-                "valor_atual": _normalize(row.get("vlr_repasse_tci")),
+                "valor_atual": _normalize(row.get("vlr_repasse_saci")),
             })
 
         for key in sorted(prev_keys - curr_keys):
@@ -457,11 +462,11 @@ def _build_cumulative_diff(history_dir: Path) -> list[dict[str, str]]:
                 "categoria": "registro_removido",
                 "natureza": "registro_removido",
                 "num_convenio": metadata["num_convenio"],
-                "cod_tci": metadata["cod_tci"],
+                "cod_saci": metadata["cod_saci"],
                 "uf": metadata["uf"],
                 "secretaria": metadata["secretaria"],
-                "campo": "vlr_repasse_tci",
-                "valor_anterior": _normalize(row.get("vlr_repasse_tci")),
+                "campo": "vlr_repasse_saci",
+                "valor_anterior": _normalize(row.get("vlr_repasse_saci")),
                 "valor_atual": "",
             })
 
@@ -483,8 +488,8 @@ def _build_cumulative_diff(history_dir: Path) -> list[dict[str, str]]:
                 continue
             category = _classify_record_change(changed)
             metadata = _row_metadata(curr, key)
-            if not metadata["cod_tci"]:
-                metadata["cod_tci"] = _row_metadata(prev, key)["cod_tci"]
+            if not metadata["cod_saci"]:
+                metadata["cod_saci"] = _row_metadata(prev, key)["cod_saci"]
             for field in changed:
                 all_rows.append({
                     "data": snapshot_date,
@@ -492,7 +497,7 @@ def _build_cumulative_diff(history_dir: Path) -> list[dict[str, str]]:
                     "categoria": category,
                     "natureza": _field_nature(field, "alterado"),
                     "num_convenio": metadata["num_convenio"],
-                    "cod_tci": metadata["cod_tci"],
+                    "cod_saci": metadata["cod_saci"],
                     "uf": metadata["uf"],
                     "secretaria": metadata["secretaria"],
                     "campo": field,
@@ -505,7 +510,7 @@ def _build_cumulative_diff(history_dir: Path) -> list[dict[str, str]]:
 
 def _write_cumulative_csv(path: Path, rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = ["data", "tipo", "categoria", "natureza", "num_convenio", "cod_tci", "uf", "secretaria", "campo", "valor_anterior", "valor_atual"]
+    fieldnames = ["data", "tipo", "categoria", "natureza", "num_convenio", "cod_saci", "uf", "secretaria", "campo", "valor_anterior", "valor_atual"]
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, delimiter=";", quoting=csv.QUOTE_ALL)
         writer.writeheader()
@@ -519,7 +524,7 @@ def _write_detail_csv(path: Path, rows: list[dict[str, str]]) -> None:
         "categoria_alteracao",
         "natureza_campo",
         "num_convenio",
-        "cod_tci",
+        "cod_saci",
         "campo",
         "valor_anterior",
         "valor_atual",
