@@ -46,7 +46,7 @@ display(metricGrid([
 
 ```js
 const docColumns = [
-  "tipo_doc_suspensiva", "consta_base_pc32", "instrumento", "recebedor", "uf", "municipio_beneficiado",
+  "tipo_doc_suspensiva", "consta_base_pc32", "instrumento", "cod_tci", "recebedor", "uf", "municipio_beneficiado",
   "programa", "valor_repasse", "situacao_da_analise",
   "doc_titularidade", "doc_viabilidade_terreno", "doc_sondagem", "doc_orcamento",
   "doc_projetos_implantacao", "doc_projetos_complementares", "doc_ambiental",
@@ -57,6 +57,7 @@ const docHeaders = {
   tipo_doc_suspensiva: "Tipo",
   consta_base_pc32: "Consta na base ativa",
   instrumento: "Instrumento",
+  cod_tci: "TCI",
   recebedor: "Recebedor",
   uf: "UF",
   municipio_beneficiado: "Município",
@@ -83,12 +84,16 @@ const moneyCol = (v) => {
     : n.toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
 };
 
+const tciLinkCol = (v) => v
+  ? html`<a href=${`https://saci.cidades.gov.br/contratos/${v}`} target="_blank" rel="noopener noreferrer">${v}</a>`
+  : "—";
+
 if (docRows.length > 0) {
   display(renderBaseDataTable({
     rows: docRows,
     columns: docColumns,
     headers: docHeaders,
-    formatters: { valor_repasse: moneyCol },
+    formatters: { valor_repasse: moneyCol, cod_tci: tciLinkCol },
     invalidation,
     exportFilePrefix: "doc-suspensivas",
   }));

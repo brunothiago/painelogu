@@ -42,7 +42,10 @@ DOC_SUSP_CSV_OUTPUT = os.path.join(os.path.dirname(__file__), "..", "src", "data
 QUERY_DOC_SUSP = text("""
 SELECT
     'Documentos apresentados' AS tipo_doc_suspensiva,
-    instrumento, proposta, operacao, recebedor, uf, municipio_beneficiado,
+    instrumento,
+    (SELECT tci.cod_tci FROM se_saci.view_mat_carteira_investimento tci
+     WHERE tci.num_convenio::numeric = instrumento::numeric LIMIT 1) AS cod_tci,
+    proposta, operacao, recebedor, uf, municipio_beneficiado,
     unidade_caixa, programa, valor_repasse, situacao_da_analise,
     titularidade AS doc_titularidade,
     viabilidade_do_terreno AS doc_viabilidade_terreno,
@@ -59,7 +62,10 @@ FROM se_cgpac.tab_thiago_pbi_caixa_ogu_susp_apre
 UNION ALL
 SELECT
     'Documentos não apresentados' AS tipo_doc_suspensiva,
-    instrumento, proposta, operacao, recebedor, uf, municipio_beneficiado,
+    instrumento,
+    (SELECT tci.cod_tci FROM se_saci.view_mat_carteira_investimento tci
+     WHERE tci.num_convenio::numeric = instrumento::numeric LIMIT 1) AS cod_tci,
+    proposta, operacao, recebedor, uf, municipio_beneficiado,
     unidade_caixa, programa, valor_repasse, situacao_da_analise,
     titularidade AS doc_titularidade,
     viabilidade_do_terreno AS doc_viabilidade_terreno,
