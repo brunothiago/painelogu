@@ -157,15 +157,18 @@ def _read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
 
 
 def _row_key(row: dict[str, str]) -> str:
-    """Retorna num_convenio como chave; se vazio, usa cod_saci como fallback."""
-    key = (row.get(KEY_FIELD) or "").strip()
-    if not key:
-        key = (row.get("num_convenio") or "").strip()
-    if not key:
-        key = (row.get(FALLBACK_KEY_FIELD) or "").strip()
-    if not key:
-        key = (row.get("cod_saci") or "").strip()
-    return key
+    """Retorna num_convenio como chave; se vazio, usa o código SACI como fallback.
+
+    Tolera snapshots antigos (sufixo _tci) e novos (_saci) para a transição.
+    """
+    for field in (
+        KEY_FIELD, "num_convenio_tci", "num_convenio",
+        FALLBACK_KEY_FIELD, "cod_tci_saci", "cod_tci_tci", "cod_saci", "cod_tci",
+    ):
+        key = (row.get(field) or "").strip()
+        if key:
+            return key
+    return ""
 
 
 def _index_rows(rows: list[dict[str, str]], label: str) -> dict[str, dict[str, str]]:
