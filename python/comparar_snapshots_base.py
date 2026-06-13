@@ -84,6 +84,17 @@ SOURCE_FIELDS = {
     "dte_inicio_obra_mcid_tci",
     "vlr_repasse_tci",
     "motivo_suspensiva_retirada_dmp",
+    "doc_titularidade",
+    "doc_viabilidade_terreno",
+    "doc_sondagem",
+    "doc_orcamento",
+    "doc_projetos_implantacao",
+    "doc_projetos_complementares",
+    "doc_ambiental",
+    "doc_vigilancia_sanitaria",
+    "doc_bombeiros",
+    "doc_trabalho_social",
+    "tipo_doc_suspensiva",
 }
 
 STATUS_FIELDS = {

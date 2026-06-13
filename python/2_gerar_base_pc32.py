@@ -34,6 +34,46 @@ SOURCE_FRESHNESS_OUTPUT = os.path.join(os.path.dirname(__file__), "..", "src", "
 PREVIOUS_CSV_OUTPUT = os.path.join(os.path.dirname(__file__), "..", "src", "data", "base_pc_32_previous.csv")
 FIRST_CSV_OUTPUT = os.path.join(os.path.dirname(__file__), "..", "src", "data", "base_pc_32_first.csv")
 CUMULATIVE_DIFF_OUTPUT = os.path.join(os.path.dirname(__file__), "..", "src", "data", "base_alteracoes.csv")
+DOC_SUSP_CSV_OUTPUT = os.path.join(os.path.dirname(__file__), "..", "src", "data", "doc_suspensivas.csv")
+
+# Detalhamento por documento da suspensiva (abas "Suspensiva Doc Apre" e
+# "Suspensiva Doc Não Apre" do PBI Caixa). Sem filtro PC32: todos os instrumentos
+# das duas abas. O flag consta_base_pc32 é calculado em Python a partir da base.
+QUERY_DOC_SUSP = text("""
+SELECT
+    'Documentos apresentados' AS tipo_doc_suspensiva,
+    instrumento, proposta, operacao, recebedor, uf, municipio_beneficiado,
+    unidade_caixa, programa, valor_repasse, situacao_da_analise,
+    titularidade AS doc_titularidade,
+    viabilidade_do_terreno AS doc_viabilidade_terreno,
+    estudos_de_sondagem AS doc_sondagem,
+    orcamento AS doc_orcamento,
+    elaboracao_de_projetos_de_implantacao AS doc_projetos_implantacao,
+    projetos_complementares AS doc_projetos_complementares,
+    manifestacao_do_orgao_ambiental AS doc_ambiental,
+    aprovacao_vigilancia_sanitaria AS doc_vigilancia_sanitaria,
+    aprovacao_bombeiros AS doc_bombeiros,
+    projeto_de_trabalho_social AS doc_trabalho_social,
+    dt_atualizacao
+FROM se_cgpac.tab_thiago_pbi_caixa_ogu_susp_apre
+UNION ALL
+SELECT
+    'Documentos não apresentados' AS tipo_doc_suspensiva,
+    instrumento, proposta, operacao, recebedor, uf, municipio_beneficiado,
+    unidade_caixa, programa, valor_repasse, situacao_da_analise,
+    titularidade AS doc_titularidade,
+    viabilidade_do_terreno AS doc_viabilidade_terreno,
+    estudos_de_sondagem AS doc_sondagem,
+    orcamento AS doc_orcamento,
+    elaboracao_de_projetos_de_implantacao AS doc_projetos_implantacao,
+    projetos_complementares AS doc_projetos_complementares,
+    manifestacao_do_orgao_ambiental AS doc_ambiental,
+    aprovacao_vigilancia_sanitaria AS doc_vigilancia_sanitaria,
+    aprovacao_bombeiros AS doc_bombeiros,
+    NULL AS doc_trabalho_social,
+    dt_atualizacao
+FROM se_cgpac.tab_thiago_pbi_caixa_ogu_susp_nao_apre
+""")
 
 QUERY = text("""
 WITH publicacao_licitacao AS (
@@ -80,6 +120,23 @@ base AS (
         tci.vlr_repasse AS vlr_repasse_tci,
         -- perspectiva de retirada da suspensiva | fonte: se_cgpac."Suspensiva29_04"
         s29.pespectiva_de_retirada_da_suspensiva AS perspectiva_de_retirada_da_suspensiva,
+
+        -- detalhamento por documento da suspensiva | fonte: abas "Suspensiva Doc Apre" (sda) e
+        -- "Suspensiva Doc Não Apre" (sdn) do PBI Caixa. Conjuntos disjuntos -> COALESCE.
+        COALESCE(sda.titularidade, sdn.titularidade) AS doc_titularidade,
+        COALESCE(sda.viabilidade_do_terreno, sdn.viabilidade_do_terreno) AS doc_viabilidade_terreno,
+        COALESCE(sda.estudos_de_sondagem, sdn.estudos_de_sondagem) AS doc_sondagem,
+        COALESCE(sda.orcamento, sdn.orcamento) AS doc_orcamento,
+        COALESCE(sda.elaboracao_de_projetos_de_implantacao, sdn.elaboracao_de_projetos_de_implantacao) AS doc_projetos_implantacao,
+        COALESCE(sda.projetos_complementares, sdn.projetos_complementares) AS doc_projetos_complementares,
+        COALESCE(sda.manifestacao_do_orgao_ambiental, sdn.manifestacao_do_orgao_ambiental) AS doc_ambiental,
+        COALESCE(sda.aprovacao_vigilancia_sanitaria, sdn.aprovacao_vigilancia_sanitaria) AS doc_vigilancia_sanitaria,
+        COALESCE(sda.aprovacao_bombeiros, sdn.aprovacao_bombeiros) AS doc_bombeiros,
+        sda.projeto_de_trabalho_social AS doc_trabalho_social,
+        CASE
+            WHEN sda.instrumento IS NOT NULL THEN 'Documentos apresentados'
+            WHEN sdn.instrumento IS NOT NULL THEN 'Documentos não apresentados'
+        END AS tipo_doc_suspensiva,
 
         -- status_suspensiva | fonte: derivada de pbi + tcon
         CASE
@@ -175,6 +232,10 @@ base AS (
         ON tci.num_convenio::numeric = tcon.num_convenio::numeric
     LEFT JOIN se_cgpac."Suspensiva29_04" s29
         ON tci.num_convenio::text = s29.instrumento::text
+    LEFT JOIN se_cgpac.tab_thiago_pbi_caixa_ogu_susp_apre sda
+        ON tci.num_convenio::numeric = sda.instrumento::numeric
+    LEFT JOIN se_cgpac.tab_thiago_pbi_caixa_ogu_susp_nao_apre sdn
+        ON tci.num_convenio::numeric = sdn.instrumento::numeric
     WHERE tci.txt_fonte = 'OGU'
       AND tci.dsc_fase_pac = 'NOVO PAC - Seleção'
       AND tci.txt_sigla_secretaria <> 'SNH'
@@ -391,6 +452,32 @@ def main():
             writer.writerows(linhas)
 
         print(f"CSV salvo em {CSV_OUTPUT} ({len(linhas)} linhas)")
+
+        # Detalhamento por documento da suspensiva (todas as linhas das 2 abas,
+        # sem filtro PC32) -> alimenta a aba "DocSuspensivas".
+        try:
+            nc_idx = colunas.index("num_convenio_tci")
+            convenios_base = {
+                str(linha[nc_idx]).strip()
+                for linha in linhas
+                if linha[nc_idx] is not None and str(linha[nc_idx]).strip()
+            }
+            doc_result = conn.execute(QUERY_DOC_SUSP)
+            doc_colunas = list(doc_result.keys()) + ["consta_base_pc32"]
+            doc_linhas = []
+            for row in doc_result.fetchall():
+                # instrumento é a 2ª coluna selecionada em QUERY_DOC_SUSP
+                instrumento = str(row[1]).strip() if row[1] is not None else ""
+                consta = "SIM" if instrumento in convenios_base else "NÃO"
+                doc_linhas.append(list(row) + [consta])
+
+            with open(DOC_SUSP_CSV_OUTPUT, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f, delimiter=";", quoting=csv.QUOTE_ALL)
+                writer.writerow(doc_colunas)
+                writer.writerows(doc_linhas)
+            print(f"CSV salvo em {DOC_SUSP_CSV_OUTPUT} ({len(doc_linhas)} linhas)")
+        except Exception as e:
+            print(f"[WARN] Falha ao gerar {DOC_SUSP_CSV_OUTPUT}: {e}")
 
     artifacts = generate_daily_snapshot_diff(
         current_csv=CSV_OUTPUT,

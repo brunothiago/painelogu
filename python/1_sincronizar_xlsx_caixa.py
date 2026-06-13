@@ -21,11 +21,15 @@ ARQUIVOS_E_TABELAS = {
     # Arquivos locais fixos (opcional). Pares URL/tabela vêm do config.env.
 }
 
-# Pares (URL, TABELA) lidos do config.env. Cada entrada define a variável
-# de ambiente que contém a URL do xlsx e a variável com o nome da tabela destino.
+# Pares (URL, TABELA, ABA) lidos do config.env. Cada entrada define a variável
+# de ambiente que contém a URL do xlsx, a variável com o nome da tabela destino
+# e, opcionalmente, o nome da aba (sheet) a ser lida. sheet=None lê a 1ª aba.
+# Uma mesma URL pode alimentar várias tabelas (uma por aba); o download é cacheado.
 URLS_E_TABELAS_ENV = [
-    ("URL_PBI_CAIXA_OGU", "TAB_BANCO_OGU"),
-    ("URL_PBI_CAIXA_FIN", "TAB_BANCO_FIN"),
+    ("URL_PBI_CAIXA_OGU", "TAB_BANCO_OGU", None),
+    ("URL_PBI_CAIXA_OGU", "TAB_BANCO_OGU_SUSP_APRE", "Suspensiva Doc Apre"),
+    ("URL_PBI_CAIXA_OGU", "TAB_BANCO_OGU_SUSP_NAO_APRE", "Suspensiva Doc Não Apre"),
+    ("URL_PBI_CAIXA_FIN", "TAB_BANCO_FIN", None),
 ]
 
 SCHEMA_PADRAO = "se_cgpac"
@@ -147,12 +151,12 @@ def baixar_arquivo(url: str, destino_dir: Path) -> Path:
 
 def resolver_pares_env() -> list:
     """
-    Lê os pares URL/TABELA declarados em URLS_E_TABELAS_ENV a partir das
+    Lê os trios URL/TABELA/ABA declarados em URLS_E_TABELAS_ENV a partir das
     variáveis de ambiente carregadas pelo config.env.
-    Retorna lista de tuplas (url, tabela).
+    Retorna lista de tuplas (url, tabela, sheet).
     """
     pares = []
-    for url_key, tab_key in URLS_E_TABELAS_ENV:
+    for url_key, tab_key, sheet_name in URLS_E_TABELAS_ENV:
         url = os.getenv(url_key)
         tabela = os.getenv(tab_key)
         if not url or not tabela:
@@ -163,7 +167,7 @@ def resolver_pares_env() -> list:
             continue
         url = url.strip().strip('"').strip("'")
         tabela = tabela.strip().strip('"').strip("'")
-        pares.append((url, tabela))
+        pares.append((url, tabela, sheet_name))
     return pares
 
 
@@ -230,19 +234,25 @@ def infer_and_convert_types(df):
     return df
 
 
-def ler_arquivo(caminho_arquivo):
+def ler_arquivo(caminho_arquivo, sheet_name=None):
     path = Path(caminho_arquivo)
     if not path.exists():
         raise FileNotFoundError(f"Arquivo não encontrado: {caminho_arquivo}")
 
     ext = path.suffix.lower()
-    print(f"[INFO] Lendo arquivo '{path.name}' como {ext}...")
+    # sheet_name=None no pandas significaria "todas as abas"; para a 1ª aba usamos 0.
+    sheet = 0 if sheet_name is None else sheet_name
+    print(
+        f"[INFO] Lendo arquivo '{path.name}' como {ext}"
+        + (f" (aba '{sheet_name}')" if sheet_name else "")
+        + "..."
+    )
 
     dtype_dict = None
     if COLUNAS_FORCAR_STRING and ext in [".xlsx", ".csv"]:
         try:
             if ext == ".xlsx":
-                cols_present = pd.read_excel(caminho_arquivo, nrows=0).columns
+                cols_present = pd.read_excel(caminho_arquivo, sheet_name=sheet, nrows=0).columns
             else:
                 try:
                     cols_present = pd.read_csv(
@@ -277,7 +287,7 @@ def ler_arquivo(caminho_arquivo):
 
     try:
         if ext == ".xlsx":
-            df = pd.read_excel(caminho_arquivo, dtype=dtype_dict)
+            df = pd.read_excel(caminho_arquivo, sheet_name=sheet, dtype=dtype_dict)
 
         elif ext == ".csv":
             try:
@@ -387,15 +397,18 @@ def processar_upload(
     schema: str,
     modo_carga: str,
     usuarios: list,
+    sheet_name=None,
 ):
     print("=" * 60)
     print(f"Processando Arquivo: {file_path}")
+    if sheet_name:
+        print(f"Aba: {sheet_name}")
     print(f"Destino: {schema}.{table_name}")
     print(f"Modo: {modo_carga.upper()}")
     print("=" * 60)
 
     try:
-        df = ler_arquivo(file_path)
+        df = ler_arquivo(file_path, sheet_name=sheet_name)
     except Exception as e:
         print(f"[ERRO] Pulo arquivo {file_path} devido a erro de leitura: {e}")
         return
@@ -514,7 +527,7 @@ def main():
     if args.arquivo:
         fpath = Path(args.arquivo)
         tname = args.tabela if args.tabela else slugify(fpath.stem)
-        lista_execucao.append((fpath, tname))
+        lista_execucao.append((fpath, tname, None))
 
     else:
         for caminho, tabela in ARQUIVOS_E_TABELAS.items():
@@ -522,20 +535,29 @@ def main():
                 continue
             fpath = Path(caminho)
             tname = tabela if tabela else slugify(fpath.stem)
-            lista_execucao.append((fpath, tname))
+            lista_execucao.append((fpath, tname, None))
 
         pares_env = resolver_pares_env()
         if pares_env:
             tmp_dir_ctx = tempfile.TemporaryDirectory(prefix="upload_generico_")
             tmp_dir = Path(tmp_dir_ctx.name)
             print(f"[INFO] Diretório temporário para downloads: {tmp_dir}")
-            for url, tabela in pares_env:
-                try:
-                    fpath = baixar_arquivo(url, tmp_dir)
-                except Exception as e:
-                    print(f"[ERRO] Falha ao baixar {url}: {e}")
-                    continue
-                lista_execucao.append((fpath, tabela))
+            # Cache de downloads por URL: a mesma URL pode alimentar várias
+            # tabelas (uma por aba) e só deve ser baixada uma vez.
+            downloads_por_url = {}
+            for url, tabela, sheet in pares_env:
+                fpath = downloads_por_url.get(url)
+                if fpath is None:
+                    try:
+                        fpath = baixar_arquivo(url, tmp_dir)
+                    except Exception as e:
+                        print(f"[ERRO] Falha ao baixar {url}: {e}")
+                        downloads_por_url[url] = False
+                        continue
+                    downloads_por_url[url] = fpath
+                elif fpath is False:
+                    continue  # download dessa URL já falhou antes
+                lista_execucao.append((fpath, tabela, sheet))
 
         if not lista_execucao:
             parser.error(
@@ -556,7 +578,7 @@ def main():
     print(f"Iniciando processamento de {len(lista_execucao)} arquivos...")
 
     try:
-        for fpath, tname in lista_execucao:
+        for fpath, tname, sheet in lista_execucao:
             processar_upload(
                 engine=engine,
                 file_path=fpath,
@@ -564,6 +586,7 @@ def main():
                 schema=args.schema,
                 modo_carga=modo_carga,
                 usuarios=usuarios_permissao,
+                sheet_name=sheet,
             )
     finally:
         if tmp_dir_ctx is not None:

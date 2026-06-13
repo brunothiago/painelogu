@@ -35,6 +35,7 @@ export default {
   pages: [
     { name: "Painel", path: "index" },
     { name: "Alterações", path: "alteracoes" },
+    { name: "DocSuspensivas", path: "docsuspensivas" },
   ],
   head: `
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,6 +59,7 @@ export default {
         <nav class="site-nav" aria-label="Navegação principal">
           <a href="./">Painel</a>
           <a href="./alteracoes">Alterações</a>
+          <a href="./docsuspensivas">DocSuspensivas</a>
         </nav>
       </div>
     </div>

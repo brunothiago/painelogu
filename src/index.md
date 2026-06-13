@@ -27,6 +27,38 @@ function pickField(row, ...names) {
   return "";
 }
 
+// Detalhamento por documento da suspensiva (abas PBI Caixa). Rótulos legíveis e
+// regra de "documento pendente" por origem (a validar com a área):
+//   - Documentos apresentados  -> pendente quando o valor é "Não Apresentado"
+//   - Documentos não apresentados -> pendente quando o valor é "NÃO"
+const DOC_SUSPENSIVA_LABELS = {
+  doc_titularidade: "Titularidade",
+  doc_viabilidade_terreno: "Viabilidade do Terreno",
+  doc_sondagem: "Estudos de Sondagem",
+  doc_orcamento: "Orçamento",
+  doc_projetos_implantacao: "Projetos de Implantação",
+  doc_projetos_complementares: "Projetos Complementares",
+  doc_ambiental: "Órgão Ambiental",
+  doc_vigilancia_sanitaria: "Vigilância Sanitária",
+  doc_bombeiros: "Bombeiros",
+  doc_trabalho_social: "Trabalho Social",
+};
+
+function docSuspensivaPendente(tipo, valor) {
+  if (!valor) return false;
+  if (tipo === "Documentos apresentados") return valor === "Não Apresentado";
+  if (tipo === "Documentos não apresentados") return valor === "NÃO";
+  return false;
+}
+
+function docsSuspensivaPendentes(d) {
+  const tipo = pickField(d, "tipo_doc_suspensiva");
+  if (!tipo) return [];
+  return Object.keys(DOC_SUSPENSIVA_LABELS)
+    .filter((k) => docSuspensivaPendente(tipo, pickField(d, k)))
+    .map((k) => DOC_SUSPENSIVA_LABELS[k]);
+}
+
 function parseBaseRow(d) {
   const dt_assinatura = parseDate(pickField(d, "dte_assinatura_contrato_tci", "dte_assinatura_contrato"));
   const dt_lae = parseDate(pickField(d, "dte_primeira_data_lae_tdb", "dte_primeira_data_lae"));
@@ -36,7 +68,7 @@ function parseBaseRow(d) {
     parseDate(pickField(d, "prazo_lae_mais_60_mais_120_calc")) ??
     (dt_lae_mais_60 ? addCalendarDays(addCalendarDays(dt_lae_mais_60, 120), 60) : null);
 
-  return {
+  const row = {
   cod_tci: pickField(d, "cod_tci_tci", "cod_tci"),
   num_convenio: pickField(d, "num_convenio_tci", "num_convenio"),
   uf: pickField(d, "txt_uf_tci", "txt_uf"),
@@ -87,7 +119,23 @@ function parseBaseRow(d) {
   data_limite_licitacao_casa_civil: parseDate(pickField(d, "data_limite_licitacao_casa_civil_const", "data_limite_licitacao_casa_civil")),
   status_regra_casa_civil: pickField(d, "status_regra_casa_civil_calc", "status_regra_casa_civil"),
   urgencia_suspensiva: pickField(d, "urgencia_suspensiva_calc", "urgencia_suspensiva"),
+  tipo_doc_suspensiva: pickField(d, "tipo_doc_suspensiva"),
+  doc_titularidade: pickField(d, "doc_titularidade"),
+  doc_viabilidade_terreno: pickField(d, "doc_viabilidade_terreno"),
+  doc_sondagem: pickField(d, "doc_sondagem"),
+  doc_orcamento: pickField(d, "doc_orcamento"),
+  doc_projetos_implantacao: pickField(d, "doc_projetos_implantacao"),
+  doc_projetos_complementares: pickField(d, "doc_projetos_complementares"),
+  doc_ambiental: pickField(d, "doc_ambiental"),
+  doc_vigilancia_sanitaria: pickField(d, "doc_vigilancia_sanitaria"),
+  doc_bombeiros: pickField(d, "doc_bombeiros"),
+  doc_trabalho_social: pickField(d, "doc_trabalho_social"),
   };
+  const docsPendentes = docsSuspensivaPendentes(d);
+  row.docs_suspensiva_pendentes = docsPendentes;
+  row.docs_suspensiva_resumo = docsPendentes.length ? docsPendentes.join(", ") : "";
+  row.docs_suspensiva_qtd = docsPendentes.length;
+  return row;
 }
 
 const rawDataParsed = dsv.parse(rawText, parseBaseRow);
@@ -1741,6 +1789,39 @@ const selectedCascade = view(cascadeChart(geoScopedData, tableRowsForCharts));
 ```
 
 </div>
+
+<div class="card card--chapter card--chapter-suspensiva">
+<h2>Documentos da suspensiva com pendência <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Contagem de contratos com cada documento pendente, a partir do detalhamento por documento do PBI Caixa.<ul><li><strong>Documentos apresentados</strong> — pendente quando o item está como "Não Apresentado"</li><li><strong>Documentos não apresentados</strong> — pendente quando o item está como "NÃO"</li></ul>Cobre apenas contratos com detalhamento de documentos no recorte atual.</span></span></h2>
+<p>Clique em uma barra para filtrar a Base de Dados pelos contratos com aquele documento pendente.</p>
+
+```js
+const docScope = geoScopedData.filter(d => d.tipo_doc_suspensiva);
+const docPendChart = Object.values(DOC_SUSPENSIVA_LABELS)
+  .map(label => ({ doc: label, qtd: docScope.filter(d => d.docs_suspensiva_pendentes.includes(label)).length }))
+  .filter(d => d.qtd > 0)
+  .sort((a, b) => b.qtd - a.qtd);
+
+const docPendInput = docPendChart.length
+  ? makeClickableChart(
+      Plot.plot({
+        marginLeft: 210, marginRight: 50,
+        height: Math.max(140, docPendChart.length * 34 + 36),
+        style: { fontFamily: "var(--font-sans, IBM Plex Sans, sans-serif)", fontSize: 13 },
+        x: { label: null, grid: false, axis: null },
+        y: { label: null, domain: docPendChart.map(d => d.doc) },
+        marks: [
+          Plot.barX(docPendChart, { x: "qtd", y: "doc", fill: "#e07b39", rx: 6 }),
+          Plot.text(docPendChart, { x: "qtd", y: "doc", text: d => formatNumber(d.qtd), dx: 6, textAnchor: "start", fontSize: 12, fill: "#5b6470" }),
+        ],
+      }),
+      docPendChart, "doc"
+    )
+  : Object.assign(html`<p class="casc-empty">Sem detalhamento de documentos no recorte atual.</p>`, { value: null });
+
+const selectedDocSuspensiva = view(docPendInput);
+```
+
+</div>
 </div>
 </section>
 
@@ -1907,6 +1988,7 @@ const tableData = geoScopedData.filter(d =>
   (!hasLicitacaoSelection || isContratoNormal(d)) &&
   (!hasLicitacaoSelection || matchesLicitacaoSelection(d, selectedLicitacao)) &&
   (!hasLicitacaoSelection || matchesCasaCivilSelection(d, selectedCasaCivil)) &&
+  (!selectedDocSuspensiva || (d.docs_suspensiva_pendentes && d.docs_suspensiva_pendentes.includes(selectedDocSuspensiva))) &&
   matchesInicioObraSelection(d, selectedInicioObra)
 );
 
@@ -1916,6 +1998,9 @@ const exportColumns = [
   "dt_retirada_suspensiva", "perspectiva_de_retirada_da_suspensiva", "dt_lae", "dt_lae_mais_60", "dt_lae_mais_60_mais_120", "data_limite_licitacao_casa_civil", "status_regra_casa_civil", "prazo_pub_licitacao", "status_pub_licitacao",
   "dt_pub_licitacao", "prazo_homolog_licitacao", "status_homolog_licitacao", "dt_homolog_licitacao",
   "dt_vrpl", "dt_aio", "prazo_inicio_obra", "status_inicio_obra", "dt_inicio_obra", "vlr_repasse",
+  "tipo_doc_suspensiva", "docs_suspensiva_resumo",
+  "doc_titularidade", "doc_viabilidade_terreno", "doc_sondagem", "doc_orcamento", "doc_projetos_implantacao",
+  "doc_projetos_complementares", "doc_ambiental", "doc_vigilancia_sanitaria", "doc_bombeiros", "doc_trabalho_social",
 ];
 const exportHeaders = {
   _diff_label: "Alteração",
@@ -1952,6 +2037,18 @@ const exportHeaders = {
   status_inicio_obra: "Status Início Obra (CALC)",
   dt_inicio_obra: "Início Obra (TCI)",
   vlr_repasse: "Repasse (TCI)",
+  tipo_doc_suspensiva: "Tipo Doc. Suspensiva",
+  docs_suspensiva_resumo: "Documentos Pendentes (Suspensiva)",
+  doc_titularidade: "Doc.: Titularidade",
+  doc_viabilidade_terreno: "Doc.: Viabilidade do Terreno",
+  doc_sondagem: "Doc.: Estudos de Sondagem",
+  doc_orcamento: "Doc.: Orçamento",
+  doc_projetos_implantacao: "Doc.: Projetos de Implantação",
+  doc_projetos_complementares: "Doc.: Projetos Complementares",
+  doc_ambiental: "Doc.: Órgão Ambiental",
+  doc_vigilancia_sanitaria: "Doc.: Vigilância Sanitária",
+  doc_bombeiros: "Doc.: Bombeiros",
+  doc_trabalho_social: "Doc.: Trabalho Social",
 };
 
 const defaultSelectedColumns = [
@@ -2101,6 +2198,12 @@ display(renderBaseDataTable({
     prazo_homolog_licitacao: "Prazo Homolog. (CALC)", status_homolog_licitacao: "Status Homolog. (CALC)",
     dt_homolog_licitacao: "Homolog. Licitação (TGOV)", dt_vrpl: "VRPL (TDB)", dt_aio: "AIO (TDB)", prazo_inicio_obra: "Prazo Início Obra (CALC)", status_inicio_obra: "Status Início Obra (CALC)",
     dt_inicio_obra: "Início Obra (TCI)", vlr_repasse: "Repasse (TCI)",
+    tipo_doc_suspensiva: "Tipo Doc. Suspensiva", docs_suspensiva_resumo: "Documentos Pendentes (Suspensiva)",
+    doc_titularidade: "Doc.: Titularidade", doc_viabilidade_terreno: "Doc.: Viabilidade do Terreno",
+    doc_sondagem: "Doc.: Estudos de Sondagem", doc_orcamento: "Doc.: Orçamento",
+    doc_projetos_implantacao: "Doc.: Projetos de Implantação", doc_projetos_complementares: "Doc.: Projetos Complementares",
+    doc_ambiental: "Doc.: Órgão Ambiental", doc_vigilancia_sanitaria: "Doc.: Vigilância Sanitária",
+    doc_bombeiros: "Doc.: Bombeiros", doc_trabalho_social: "Doc.: Trabalho Social",
   },
   formatters: {
     _diff_label: diffCol,
