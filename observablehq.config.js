@@ -23,7 +23,7 @@ const footerSourceFreshness = (sourceFreshness?.sources ?? []).map(
 );
 
 export default {
-  title: "Painel DMP/MCid-OGU-Novo PAC",
+  title: "Painel DMP-OGU-Novo PAC",
   root: "src",
   output: "dist",
   base: "/painelogu/",
@@ -43,6 +43,15 @@ export default {
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <meta name="description" content="Painel dos Contratos de Novas Seleções do MCid - Termos de Compromisso OGU - Base BI CEF">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Painel DMP-OGU-Novo PAC">
+    <meta property="og:description" content="Painel dos Contratos de Novas Seleções do MCid - Termos de Compromisso OGU - Base BI CEF">
+    <meta property="og:image" content="https://brunothiago.github.io/painelogu/_file/apple-touch-icon.8e09bae1.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Painel DMP-OGU-Novo PAC">
+    <meta name="twitter:description" content="Painel dos Contratos de Novas Seleções do MCid - Termos de Compromisso OGU - Base BI CEF">
+    <meta name="twitter:image" content="https://brunothiago.github.io/painelogu/_file/apple-touch-icon.8e09bae1.png">
     <link rel="stylesheet" href="./theme.css">
   `,
   header: `

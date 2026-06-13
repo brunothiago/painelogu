@@ -1,5 +1,5 @@
 ---
-title: Painel DMP/MCid-OGU-Novo PAC
+title: Painel DMP-OGU-Novo PAC
 toc: false
 ---
 
