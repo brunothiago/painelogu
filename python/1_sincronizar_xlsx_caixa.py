@@ -25,11 +25,13 @@ ARQUIVOS_E_TABELAS = {
 # de ambiente que contém a URL do xlsx, a variável com o nome da tabela destino
 # e, opcionalmente, o nome da aba (sheet) a ser lida. sheet=None lê a 1ª aba.
 # Uma mesma URL pode alimentar várias tabelas (uma por aba); o download é cacheado.
+# Nota: o financiamento (NOVO_PAC_Financiamento.xlsx) é responsabilidade do
+# projeto painelfin (tabela própria tab_financiamento_novo_pac). O painelogu
+# não consome esses dados, então não sincroniza o FIN aqui.
 URLS_E_TABELAS_ENV = [
     ("URL_PBI_CAIXA_OGU", "TAB_BANCO_OGU", None),
     ("URL_PBI_CAIXA_OGU", "TAB_BANCO_OGU_SUSP_APRE", "Suspensiva Doc Apre"),
     ("URL_PBI_CAIXA_OGU", "TAB_BANCO_OGU_SUSP_NAO_APRE", "Suspensiva Doc Não Apre"),
-    ("URL_PBI_CAIXA_FIN", "TAB_BANCO_FIN", None),
 ]
 
 SCHEMA_PADRAO = "se_cgpac"
