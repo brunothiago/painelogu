@@ -824,7 +824,7 @@ function makeCrossFilteredCharts(data, previousBaseData, drillField, drillLabel,
     const sitCard = document.createElement("div");
     sitCard.className = "card";
     sitCard.innerHTML = `
-      <h2>Situação do Contrato DMP <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Classificação da situação contratual consolidada pela DMP.<ul><li><strong>Em Contratação</strong> — instrumento ainda não formalizado</li><li><strong>Contratado - Suspensiva</strong> — contrato assinado com condição suspensiva pendente</li><li><strong>Contratado - Normal</strong> — contrato ativo sem restrições ou normalizado quando a análise suspensiva DMP indicar retirada</li><li><strong>Cancelado ou Distratado</strong> — contrato encerrado</li><li><strong>Contratado - Em Prestação de Contas</strong> — contrato em fase de prestação de contas</li></ul></span></span></h2>
+      <h2>Situação do Contrato (TCI) <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Classificação da situação contratual conforme a origem (TCI/MCID).<ul><li><strong>Em Contratação</strong> — instrumento ainda não formalizado</li><li><strong>Contratado - Suspensiva</strong> — contrato assinado com condição suspensiva pendente</li><li><strong>Contratado - Normal</strong> — contrato ativo sem restrições</li><li><strong>Cancelado ou Distratado</strong> — contrato encerrado</li><li><strong>Contratado - Em Prestação de Contas</strong> — contrato em fase de prestação de contas</li></ul></span></span></h2>
       <p>Clique em uma barra para filtrar</p>
     `;
     const sitChart = makeClickableChart(
@@ -859,7 +859,7 @@ function makeCrossFilteredCharts(data, previousBaseData, drillField, drillLabel,
     const suspCard = document.createElement("div");
     suspCard.className = "card";
     suspCard.innerHTML = `
-      <h2>Situação da Análise Suspensiva DMP <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Situação consolidada da condição suspensiva, priorizando a classificação DMP e preservando o valor original do PBI quando não há marco suficiente para considerar retirada.<ul><li><strong>Doc. não enviada p/ análise</strong> — documentação ainda não submetida</li><li><strong>Análise não iniciada / iniciada</strong> — etapas de tramitação interna</li><li><strong>Analisada e aceita</strong> — condição aceita, aguardando retirada</li><li><strong>Suspensiva retirada</strong> — condição satisfeita, contrato liberado ou inferida pelos marcos de andamento</li></ul></span></span></h2>
+      <h2>Situação da Análise Suspensiva (PBI) <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Situação da condição suspensiva conforme o PBI.<ul><li><strong>Doc. não enviada p/ análise</strong> — documentação ainda não submetida</li><li><strong>Análise não iniciada / iniciada</strong> — etapas de tramitação interna</li><li><strong>Analisada e aceita</strong> — condição aceita, aguardando retirada</li><li><strong>Suspensiva retirada</strong> — condição satisfeita, contrato liberado</li></ul></span></span></h2>
       <p>Clique em uma barra para filtrar</p>
     `;
     const suspChart = makeClickableChart(
