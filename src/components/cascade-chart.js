@@ -104,8 +104,11 @@ function buildVencimentoMonthChart(rows, options = {}) {
   const maxQtd = Math.max(1, ...byMonth.map((d) => d.qtd));
 
   function renderPlot() {
-    const containerWidth = scroll.clientWidth;
-    const width = Math.max(containerWidth > 0 ? containerWidth : 420, minPlotWidth);
+    const containerWidth = scroll.clientWidth || 420;
+    // Largura-alvo compacta (~80px por mês) com teto, mantendo responsivo
+    // abaixo do teto: evita barras gigantes quando o card é muito largo.
+    const idealWidth = byMonth.length * 80 + 64;
+    const width = Math.max(minPlotWidth, Math.min(containerWidth, idealWidth));
     scroll.replaceChildren(
       Plot.plot({
         width,
