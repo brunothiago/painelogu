@@ -1,6 +1,7 @@
 import * as Plot from "@observablehq/plot";
 import {SITUACAO_CORES, SUSPENSIVA_CORES, SITUACAO_ORDER, SUSPENSIVA_ORDER, URGENCIA_CORES, PALETTE} from "../lib/theme.js";
 import {hexToRgba} from "../lib/dom-helpers.js";
+import {formatCurrencyCompact} from "../lib/formatters.js";
 
 const URGENCIA_ORDER = ["Vencida", "Próximos 30 dias", "31–90 dias", "Mais de 90 dias", "Sem data"];
 const MS_PER_DAY = 86400000;
@@ -49,8 +50,63 @@ function hasAnySelection(value) {
   return Object.values(value).some((v) => (Array.isArray(v) ? v.length > 0 : Boolean(v)));
 }
 
+// Painel-resumo de valores (contratos + repasse) por mês de vencimento,
+// escopo "suspensiva pendente do bloco". Se há meses selecionados, restringe
+// a eles; senão lista todos os meses do recorte.
+function buildVencimentoSummary(pendentes, selectedMonths = []) {
+  const byKey = new Map();
+  for (const d of pendentes) {
+    const key = monthYearKey(d.dt_vencimento_suspensiva);
+    const k = key == null ? "sem" : key;
+    let rec = byKey.get(k);
+    if (!rec) {
+      rec = {sortKey: key, label: monthYearLabel(key), qtd: 0, vlr: 0, color: urgencyColorForMonth(key)};
+      byKey.set(k, rec);
+    }
+    rec.qtd += 1;
+    rec.vlr += Number(d.vlr_repasse) || 0;
+  }
+
+  let meses = [...byKey.values()].sort(
+    (a, b) => (a.sortKey ?? Infinity) - (b.sortKey ?? Infinity)
+  );
+  if (selectedMonths.length) meses = meses.filter((m) => selectedMonths.includes(m.label));
+  if (meses.length === 0) return null;
+
+  const totalQtd = meses.reduce((s, m) => s + m.qtd, 0);
+  const totalVlr = meses.reduce((s, m) => s + m.vlr, 0);
+
+  const box = el("div", "casc-month-summary");
+  const title = el("div", "casc-month-summary__title");
+  title.textContent = selectedMonths.length ? "Meses selecionados" : "Repasse por mês de vencimento";
+  box.append(title);
+
+  const total = el("div", "casc-month-summary__total");
+  const totalN = el("span", "casc-month-summary__total-n");
+  totalN.textContent = `${totalQtd.toLocaleString("pt-BR")} contrato${totalQtd === 1 ? "" : "s"}`;
+  const totalVlrEl = el("span", "casc-month-summary__total-vlr");
+  totalVlrEl.textContent = formatCurrencyCompact(totalVlr);
+  total.append(totalN, totalVlrEl);
+  box.append(total);
+
+  const list = el("div", "casc-month-summary__list");
+  for (const m of meses) {
+    const item = el("div", "casc-month-summary__item");
+    const dot = el("span", "casc-legend__dot");
+    dot.style.background = m.color;
+    const txt = el("span", "casc-month-summary__item-txt");
+    txt.innerHTML =
+      `<strong>${m.label}</strong>` +
+      `<span>${m.qtd.toLocaleString("pt-BR")} · ${formatCurrencyCompact(m.vlr)}</span>`;
+    item.append(dot, txt);
+    list.append(item);
+  }
+  box.append(list);
+  return box;
+}
+
 function buildVencimentoMonthChart(rows, options = {}) {
-  const {fromTable = false, selectedMonths = [], onToggleMonth = null} = options;
+  const {fromTable = false, selectedMonths = [], onToggleMonth = null, summaryRows = rows} = options;
   const counts = new Map();
   let semData = 0;
   for (const row of rows) {
@@ -166,7 +222,11 @@ function buildVencimentoMonthChart(rows, options = {}) {
     }
   }
 
-  wrap.append(scroll);
+  const body = el("div", "casc-month-chart__body");
+  body.append(scroll);
+  const summary = buildVencimentoSummary(summaryRows, selectedMonths);
+  if (summary) body.append(summary);
+  wrap.append(body);
 
   const resizeObserver = new ResizeObserver(() => renderPlot());
   resizeObserver.observe(scroll);
@@ -482,6 +542,7 @@ export function cascadeChart(data, tableRowsRef = null) {
         fromTable: tableFiltered,
         selectedMonths: container.value.mesVencimento ?? [],
         onToggleMonth: toggleMonth,
+        summaryRows: pendentes,
       }));
     }
   }

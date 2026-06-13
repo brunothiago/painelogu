@@ -3985,11 +3985,85 @@ body {
     box-shadow: 0 4px 18px rgba(20,31,39,0.05);
 }
 
+.casc-month-chart__body {
+    display: flex;
+    gap: 1.25rem;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
 .casc-month-chart__scroll {
     overflow-x: auto;
-    width: 100%;
+    flex: 0 1 640px;
     min-width: 0;
     padding-bottom: 0.25rem;
+}
+
+.casc-month-summary {
+    flex: 1 1 240px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+    background: rgba(250, 248, 244, 0.7);
+    border: 1px solid rgba(215, 210, 199, 0.9);
+    border-radius: 14px;
+}
+
+.casc-month-summary__title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--theme-foreground-muted);
+}
+
+.casc-month-summary__total {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(215, 210, 199, 0.7);
+}
+
+.casc-month-summary__total-n {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--theme-foreground);
+}
+
+.casc-month-summary__total-vlr {
+    font-size: 1.35rem;
+    font-weight: 700;
+    font-family: var(--font-serif);
+    color: var(--theme-foreground);
+}
+
+.casc-month-summary__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    overflow-y: auto;
+    max-height: 220px;
+}
+
+.casc-month-summary__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.casc-month-summary__item-txt {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--theme-foreground);
+}
+
+.casc-month-summary__item-txt span {
+    color: var(--theme-foreground-muted);
+    white-space: nowrap;
 }
 
 .casc-month-chart__scroll svg {
