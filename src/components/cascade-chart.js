@@ -100,6 +100,8 @@ function buildVencimentoMonthChart(rows, options = {}) {
 
   const scroll = el("div", "casc-month-chart__scroll");
   const minPlotWidth = byMonth.length * 52 + 48;
+  // altura de referência para a camada de clique (alvo de coluna cheia)
+  const maxQtd = Math.max(1, ...byMonth.map((d) => d.qtd));
 
   function renderPlot() {
     const containerWidth = scroll.clientWidth;
@@ -130,18 +132,29 @@ function buildVencimentoMonthChart(rows, options = {}) {
             fill: "#5b6470",
             pointerEvents: "none",
           }),
+          // camada de clique: barras transparentes de altura cheia — garante
+          // alvo generoso mesmo para meses com valor 1 ou 2.
+          Plot.barY(byMonth, {x: "label", y: () => maxQtd, fill: "transparent"}),
         ],
       })
     );
 
     if (onToggleMonth) {
-      const rects = Array.from(scroll.querySelectorAll("g[aria-label='bar'] rect"));
-      rects.forEach((r, i) => {
+      // groups[0] = barras coloridas (visual/realce); groups[1] = camada de clique
+      const groups = scroll.querySelectorAll("g[aria-label='bar']");
+      const colored = groups[0] ? Array.from(groups[0].querySelectorAll("rect")) : [];
+      const hits = groups[1] ? Array.from(groups[1].querySelectorAll("rect")) : [];
+      colored.forEach((r, i) => {
         const item = byMonth[i];
         if (!item) return;
         const selected = selectedMonths.includes(item.label);
-        r.style.cursor = "pointer";
         r.style.opacity = selectedMonths.length === 0 || selected ? "1" : "0.25";
+      });
+      hits.forEach((r, i) => {
+        const item = byMonth[i];
+        if (!item) return;
+        r.style.cursor = "pointer";
+        r.style.fill = "transparent";
         r.addEventListener("click", (event) => {
           event.stopPropagation();
           onToggleMonth(item.label);
