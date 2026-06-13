@@ -26,7 +26,7 @@ pageTitleBar.innerHTML = `
 display(pageTitleBar);
 ```
 
-<p class="metric-detail">Detalhamento por documento da condição suspensiva (abas "Suspensiva Doc Apre" e "Suspensiva Doc Não Apre" do PBI Caixa), com <strong>todos</strong> os instrumentos da fonte — inclusive os que não constam na base PC32. A coluna <strong>Consta na base PC32</strong> indica quais também aparecem no painel principal.</p>
+<p class="metric-detail">Detalhamento por documento da condição suspensiva (abas "Suspensiva Doc Apre" e "Suspensiva Doc Não Apre" do PBI Caixa), com <strong>todos</strong> os instrumentos da fonte — inclusive os que não constam na Base Ativa do Painel. A coluna <strong>Consta na base ativa</strong> indica quais também aparecem no painel principal.</p>
 
 ```js
 const totalInstrumentos = docRows.length;
@@ -38,7 +38,7 @@ display(metricGrid([
   { label: "Instrumentos", value: formatNumber(totalInstrumentos), tone: "default" },
   { label: "Documentos apresentados", value: formatNumber(docApresentados), tone: "gold" },
   { label: "Documentos não apresentados", value: formatNumber(docNaoApresentados), tone: "blue" },
-  { label: "Constam na base PC32", value: formatNumber(constamNaBase), tone: "green" },
+  { label: "Constam na base ativa", value: formatNumber(constamNaBase), tone: "green" },
 ]));
 ```
 
@@ -55,7 +55,7 @@ const docColumns = [
 
 const docHeaders = {
   tipo_doc_suspensiva: "Tipo",
-  consta_base_pc32: "Consta na base PC32",
+  consta_base_pc32: "Consta na base ativa",
   instrumento: "Instrumento",
   recebedor: "Recebedor",
   uf: "UF",
