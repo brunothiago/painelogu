@@ -35,6 +35,7 @@ const rawChanges = dsv.parse(changesRawText, parseChangeRow);
 const diffFieldLabels = {
   dsc_situacao_contrato_mcid_tci: "Situação Contrato (TCI)",
   situacao_da_analise_suspensiva_pbi: "Situação Suspensiva (PBI)",
+  situacao_contrato_dmp: "Situação Contrato (DMP)",
   situacao_da_analise_suspensiva_dmp: "Situação Suspensiva (DMP)",
   situacao_da_analise_suspensiva_cgpac: "Situação Suspensiva (DMP)",
   motivo_suspensiva_retirada_dmp: "Motivo Retirada (DMP)",

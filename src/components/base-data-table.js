@@ -66,9 +66,7 @@ function chooseFilterType(rows, column) {
     column === "situacao" ||
     column === "situacao_suspensiva" ||
     column === "situacao_contrato_tci" ||
-    column === "situacao_contrato_dmp" ||
     column === "situacao_suspensiva_pbi" ||
-    column === "situacao_suspensiva_dmp" ||
     column === "mes_ano_vencimento_suspensiva"
   ) {
     return "select";
@@ -93,9 +91,7 @@ function getColumnClassName(column) {
     column === "situacao" ||
     column === "situacao_suspensiva" ||
     column === "situacao_contrato_tci" ||
-    column === "situacao_contrato_dmp" ||
     column === "situacao_suspensiva_pbi" ||
-    column === "situacao_suspensiva_dmp" ||
     column === "data_limite_licitacao_casa_civil" ||
     column === "proponente"
   ) return "col-long";
@@ -116,9 +112,7 @@ function getColumnWidth(column) {
     column === "situacao" ||
     column === "situacao_suspensiva" ||
     column === "situacao_contrato_tci" ||
-    column === "situacao_contrato_dmp" ||
-    column === "situacao_suspensiva_pbi" ||
-    column === "situacao_suspensiva_dmp"
+    column === "situacao_suspensiva_pbi"
   ) return "176px";
   if (column === "proponente") return "200px";
   if (column === "data_limite_licitacao_casa_civil") return "168px";

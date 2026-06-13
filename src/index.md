@@ -49,11 +49,9 @@ function parseBaseRow(d) {
   fase: pickField(d, "dsc_fase_pac_tci", "dsc_fase_pac"),
   modalidade: pickField(d, "txt_modalidade_tci", "txt_modalidade"),
   situacao_contrato_tci: pickField(d, "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
-  situacao_contrato_dmp: pickField(d, "situacao_contrato_dmp", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
-  situacao: pickField(d, "situacao_contrato_dmp", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
+  situacao: pickField(d, "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
   dt_assinatura,
-  situacao_suspensiva_dmp: pickField(d, "situacao_da_analise_suspensiva_dmp", "situacao_da_analise_suspensiva_cgpac", "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
-  situacao_suspensiva: pickField(d, "situacao_da_analise_suspensiva_dmp", "situacao_da_analise_suspensiva_cgpac", "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
+  situacao_suspensiva: pickField(d, "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
   situacao_suspensiva_pbi: pickField(d, "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
   perspectiva_de_retirada_da_suspensiva: pickField(d, "perspectiva_de_retirada_da_suspensiva", "pespectiva_de_retirada_da_suspensiva"),
   motivo_suspensiva_retirada_dmp: pickField(d, "motivo_suspensiva_retirada_dmp", "motivo_suspensiva_retirada_cgpac"),
@@ -120,19 +118,19 @@ function diffLabel(value) {
   return "Sem alteração";
 }
 
-function isSuspensivaRetiradaDmp(d) {
+function isSuspensivaRetirada(d) {
   return d.situacao_suspensiva === "Suspensiva retirada";
 }
 
 function isComSuspensivaAtiva(d) {
-  return d.situacao === "Contratado - Suspensiva" && !isSuspensivaRetiradaDmp(d);
+  return d.situacao === "Contratado - Suspensiva" && !isSuspensivaRetirada(d);
 }
 
 function isSemSuspensivaDmp(d) {
-  return d.situacao === "Contratado - Normal" || isSuspensivaRetiradaDmp(d);
+  return d.situacao === "Contratado - Normal" || isSuspensivaRetirada(d);
 }
 
-function isContratoNormalDmp(d) {
+function isContratoNormal(d) {
   return d.situacao === "Contratado - Normal";
 }
 
@@ -1024,7 +1022,7 @@ function makeCrossFilteredCharts(data, previousBaseData, drillField, drillLabel,
     const cardsRow = metricGrid([
       { label: "Total selecionadas", value: formatNumber(_total), topRight: formatCurrencyCompact(_vlrTotal), delta: buildMetricDelta(_total, _pTotal), detail: _drillDetail, tone: "default" },
       { label: "Com suspensiva", value: formatNumber(_comSusp), topRight: formatCurrencyCompact(_vlrComSusp), detail: `${formatPercent(_pctSusp)} ${_drillDetail}`, delta: buildMetricDelta(_comSusp, _pComSusp), tone: "gold" },
-      { label: "Sem suspensiva (DMP)", value: formatNumber(_semSusp), topRight: formatCurrencyCompact(_vlrSemSusp), detail: `${formatPercent(_pctSem)} ${_drillDetail}`, delta: buildMetricDelta(_semSusp, _pSemSusp), tone: "green" },
+      { label: "Sem suspensiva", value: formatNumber(_semSusp), topRight: formatCurrencyCompact(_vlrSemSusp), detail: `${formatPercent(_pctSem)} ${_drillDetail}`, delta: buildMetricDelta(_semSusp, _pSemSusp), tone: "green" },
       { label: "Contratos inativos", value: formatNumber(_restantes), topRight: formatCurrencyCompact(_vlrRestantes), detail: `${formatPercent(_pctRestantes)} ${_drillDetail}`, delta: buildMetricDelta(_restantes, _pRestantes), tone: "blue" },
     ]);
 
@@ -1429,8 +1427,8 @@ function renderLicitacaoExplorer(data, previousData) {
     );
     if (active) container.append(active);
 
-    const eligible = data.filter(d => isContratoNormalDmp(d));
-    const previousEligible = previousData.filter(d => isContratoNormalDmp(d));
+    const eligible = data.filter(d => isContratoNormal(d));
+    const previousEligible = previousData.filter(d => isContratoNormal(d));
     const flowSource = eligible.filter(d => matchesCasaCivilSelection(d, container.value.casaCivil));
     const cascadeBase = flowSource.filter(d => matchesLicitacaoSelection(d, container.value.flow));
     const casaCivilSource = eligible.filter(d => matchesLicitacaoSelection(d, container.value.flow));
@@ -1480,8 +1478,8 @@ function renderLicitacaoExplorer(data, previousData) {
     ].filter(d => d.qtd > 0);
 
     container.append(metricGrid([
-      { label: "Contratado - Normal (DMP)", value: formatNumber(cascadeBase.length), topRight: formatCurrencyCompact(valorSelecionado), detail: "no recorte atual da licitação", delta: buildMetricDelta(cascadeBase.length, previousSelecionada.length), tone: "default" },
-      { label: "Aguardando publicação", value: formatNumber(aguardandoPublicacaoSelecionada.length), topRight: formatCurrencyCompact(vlr(aguardandoPublicacaoSelecionada)), detail: formatPercent(cascadeBase.length > 0 ? aguardandoPublicacaoSelecionada.length / cascadeBase.length : 0) + " dos contratos em Contratado - Normal (DMP)", delta: buildMetricDelta(aguardandoPublicacaoSelecionada.length, previousAguardandoPublicacaoSelecionada.length), tone: "gold" },
+      { label: "Contratado - Normal", value: formatNumber(cascadeBase.length), topRight: formatCurrencyCompact(valorSelecionado), detail: "no recorte atual da licitação", delta: buildMetricDelta(cascadeBase.length, previousSelecionada.length), tone: "default" },
+      { label: "Aguardando publicação", value: formatNumber(aguardandoPublicacaoSelecionada.length), topRight: formatCurrencyCompact(vlr(aguardandoPublicacaoSelecionada)), detail: formatPercent(cascadeBase.length > 0 ? aguardandoPublicacaoSelecionada.length / cascadeBase.length : 0) + " dos contratos em Contratado - Normal", delta: buildMetricDelta(aguardandoPublicacaoSelecionada.length, previousAguardandoPublicacaoSelecionada.length), tone: "gold" },
       { label: "Sem prazo (PC 72)", value: formatNumber(publicacaoSemPrazoSelecionada), topRight: formatCurrencyCompact(vlr(pubSemPrazoArr)), detail: "assinados antes de 21/10/2025", delta: buildMetricDelta(publicacaoSemPrazoSelecionada, previousPublicacaoSemPrazoSelecionada), tone: "default" },
       { label: "Publicação vencida", value: formatNumber(publicacaoVencidaSelecionada), topRight: formatCurrencyCompact(vlr(pubVencidaArr)), detail: "prazo de 60 dias após LAE", delta: buildMetricDelta(publicacaoVencidaSelecionada, previousPublicacaoVencidaSelecionada), tone: "red" },
       { label: "Publicação nos próximos 30 dias", value: formatNumber(publicacaoProx30Selecionada), topRight: formatCurrencyCompact(vlr(pubProx30Arr)), detail: "prazo de 60 dias após LAE", delta: buildMetricDelta(publicacaoProx30Selecionada, previousPublicacaoProx30Selecionada), tone: "gold" },
@@ -1547,7 +1545,7 @@ function renderLicitacaoExplorer(data, previousData) {
     const publicadas = cascadeBase.filter(d => d.dt_pub_licitacao);
     container.append(
       makeFlowLevel(
-        `${cascadeBase.length.toLocaleString("pt-BR")} contratos em Contratado - Normal (DMP)`,
+        `${cascadeBase.length.toLocaleString("pt-BR")} contratos em Contratado - Normal`,
         "por etapa da publicação da licitação",
         [
           { label: "Aguardando publicação", qtd: aguardandoPublicacao.length, color: LICITACAO_CORES["Aguardando publicação"] },
@@ -1559,7 +1557,7 @@ function renderLicitacaoExplorer(data, previousData) {
     );
 
     if (aguardandoPublicacao.length > 0) {
-      container.append(makeFlowConnector("publicação até 120 dias para contratos em Contratado - Normal (DMP)"));
+      container.append(makeFlowConnector("publicação até 120 dias para contratos em Contratado - Normal"));
       container.append(
         makeFlowLevel(
           `${aguardandoPublicacao.length.toLocaleString("pt-BR")} contratos aguardando publicação`,
@@ -1749,8 +1747,8 @@ const selectedCascade = view(cascadeChart(geoScopedData, tableRowsForCharts));
 <section class="section-block section-block--licitacao">
 <header class="section-block__header">
 <span class="section-block__eyebrow">Marco licitatório</span>
-<h2>Análise de Licitação <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Monitoramento dos prazos de licitação para contratos com situação de contrato DMP igual a <strong>Contratado - Normal</strong>.<ul><li><strong>Base do bloco</strong> — considera apenas contratos em <strong>Contratado - Normal (DMP)</strong></li><li><strong>Exceção PC 72</strong> — contratos assinados antes de <strong>21/10/2025</strong> aparecem como <strong>Sem prazo (PC 72)</strong> na publicação</li><li><strong>Sem prazo calculado</strong> — contratos sem publicação e sem classificação de prazo calculada na base</li><li><strong>Prazo de publicação</strong> — até 120 dias corridos conforme a regra calculada da base, exceto os casos da PC 72</li><li><strong>Prazo de homologação</strong> — até 120 dias corridos após a publicação da licitação</li><li><strong>Regra Casa Civil</strong> — publicação, homologação e ordem de serviço devem ocorrer até 01/06/2026</li></ul>Classificação de prazo:<ul><li><strong>Vencida</strong> — prazo já expirou</li><li><strong>Próximos 30 dias</strong> — vence em até 30 dias</li><li><strong>No prazo</strong> — mais de 30 dias restantes</li><li><strong>Sem prazo (PC 72)</strong> — assinatura anterior a 21/10/2025</li><li><strong>Sem prazo calculado</strong> — sem status calculado na base</li></ul></span></span></h2>
-<p>Prazos de publicação e homologação para contratos em <strong>Contratado - Normal (DMP)</strong>, incluindo a exceção da PC 72.</p>
+<h2>Análise de Licitação <span class="rule-tooltip"><button class="rule-tooltip__trigger" aria-label="Regra">?</button><span class="rule-tooltip__content">Monitoramento dos prazos de licitação para contratos com situação de contrato (TCI) igual a <strong>Contratado - Normal</strong>.<ul><li><strong>Base do bloco</strong> — considera apenas contratos em <strong>Contratado - Normal</strong></li><li><strong>Exceção PC 72</strong> — contratos assinados antes de <strong>21/10/2025</strong> aparecem como <strong>Sem prazo (PC 72)</strong> na publicação</li><li><strong>Sem prazo calculado</strong> — contratos sem publicação e sem classificação de prazo calculada na base</li><li><strong>Prazo de publicação</strong> — até 120 dias corridos conforme a regra calculada da base, exceto os casos da PC 72</li><li><strong>Prazo de homologação</strong> — até 120 dias corridos após a publicação da licitação</li><li><strong>Regra Casa Civil</strong> — publicação, homologação e ordem de serviço devem ocorrer até 01/06/2026</li></ul>Classificação de prazo:<ul><li><strong>Vencida</strong> — prazo já expirou</li><li><strong>Próximos 30 dias</strong> — vence em até 30 dias</li><li><strong>No prazo</strong> — mais de 30 dias restantes</li><li><strong>Sem prazo (PC 72)</strong> — assinatura anterior a 21/10/2025</li><li><strong>Sem prazo calculado</strong> — sem status calculado na base</li></ul></span></span></h2>
+<p>Prazos de publicação e homologação para contratos em <strong>Contratado - Normal</strong>, incluindo a exceção da PC 72.</p>
 </header>
 
 <div class="section-block__body">
@@ -1906,7 +1904,7 @@ const selectedCasaCivil = selectedLicitacaoState?.casaCivil ?? null;
 const hasLicitacaoSelection = Object.values(selectedLicitacao).some(Boolean) || selectedCasaCivil != null;
 const tableData = geoScopedData.filter(d =>
   (!hasCascadeSelection || matchesCascadeSelection(d, selectedCascade)) &&
-  (!hasLicitacaoSelection || isContratoNormalDmp(d)) &&
+  (!hasLicitacaoSelection || isContratoNormal(d)) &&
   (!hasLicitacaoSelection || matchesLicitacaoSelection(d, selectedLicitacao)) &&
   (!hasLicitacaoSelection || matchesCasaCivilSelection(d, selectedCasaCivil)) &&
   matchesInicioObraSelection(d, selectedInicioObra)
@@ -1914,7 +1912,7 @@ const tableData = geoScopedData.filter(d =>
 
 const exportColumns = [
   "_diff_label", "num_convenio", "cod_tci", "secretaria", "regiao", "uf", "municipio", "proponente", "fase", "modalidade",
-  "situacao_contrato_tci", "situacao_contrato_dmp", "situacao_suspensiva_pbi", "situacao_suspensiva_dmp", "dt_assinatura", "dt_vencimento_suspensiva", "mes_ano_vencimento_suspensiva",
+  "situacao_contrato_tci", "situacao_suspensiva_pbi", "dt_assinatura", "dt_vencimento_suspensiva", "mes_ano_vencimento_suspensiva",
   "dt_retirada_suspensiva", "perspectiva_de_retirada_da_suspensiva", "dt_lae", "dt_lae_mais_60", "dt_lae_mais_60_mais_120", "data_limite_licitacao_casa_civil", "status_regra_casa_civil", "prazo_pub_licitacao", "status_pub_licitacao",
   "dt_pub_licitacao", "prazo_homolog_licitacao", "status_homolog_licitacao", "dt_homolog_licitacao",
   "dt_vrpl", "dt_aio", "prazo_inicio_obra", "status_inicio_obra", "dt_inicio_obra", "vlr_repasse",
@@ -1931,9 +1929,7 @@ const exportHeaders = {
   fase: "Fase",
   modalidade: "Modalidade",
   situacao_contrato_tci: "Situação Contrato (TCI)",
-  situacao_contrato_dmp: "Situação Contrato (DMP)",
   situacao_suspensiva_pbi: "Situação Suspensiva (PBI)",
-  situacao_suspensiva_dmp: "Situação Suspensiva (DMP)",
   dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)",
   mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Suspensiva",
   dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
@@ -1967,9 +1963,7 @@ const defaultSelectedColumns = [
   "proponente",
   "modalidade",
   "situacao_contrato_tci",
-  "situacao_contrato_dmp",
   "situacao_suspensiva_pbi",
-  "situacao_suspensiva_dmp",
   "dt_assinatura",
   "dt_vencimento_suspensiva",
   "mes_ano_vencimento_suspensiva",
@@ -2076,7 +2070,7 @@ const tciLinkCol = d => d
   : "—";
 
 const diffFieldLabels = {
-  situacao: "Situação", situacao_contrato_tci: "Sit. Contrato TCI", situacao_contrato_dmp: "Sit. Contrato DMP", situacao_suspensiva_pbi: "Sit. Suspensiva PBI", situacao_suspensiva_dmp: "Sit. Suspensiva DMP", status_suspensiva: "Status Suspensiva",
+  situacao: "Situação", situacao_contrato_tci: "Sit. Contrato TCI", situacao_suspensiva_pbi: "Sit. Suspensiva PBI", status_suspensiva: "Status Suspensiva",
   fase_atual: "Fase Atual", dt_retirada_suspensiva: "Ret. Suspensiva", dt_lae: "LAE",
   dt_pub_licitacao: "Pub. Licitação", dt_homolog_licitacao: "Homolog.", dt_vrpl: "VRPL",
   dt_aio: "AIO", dt_inicio_obra: "Início Obra", vlr_repasse: "Repasse",
@@ -2099,7 +2093,7 @@ display(renderBaseDataTable({
     _diff_label: "Alteração", num_convenio: "Convênio", cod_tci: "TCI", secretaria: "Secretaria",
     regiao: "Região", uf: "UF", municipio: "Município", proponente: "Proponente (TCI)",
     fase: "Fase", modalidade: "Modalidade", situacao_contrato_tci: "Situação Contrato (TCI)",
-    situacao_contrato_dmp: "Situação Contrato (DMP)", situacao_suspensiva_pbi: "Situação Suspensiva (PBI)", situacao_suspensiva_dmp: "Situação Suspensiva (DMP)",
+    situacao_suspensiva_pbi: "Situação Suspensiva (PBI)",
     dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)", mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Susp.", dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
     perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
     dt_assinatura: "Assinatura (TCI)", dt_lae: "LAE (TDB)", dt_lae_mais_60: "Publ. Licit. = LAE + 60d +60d (CALC)", dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60d +60d)+ 120 + 60 (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",

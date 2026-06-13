@@ -265,39 +265,6 @@ SELECT
 
     CASE
         WHEN dsc_situacao_contrato_mcid_tci in('Em Contratação','Cancelado ou Distratado','Contratado - Em Prestação de Contas') THEN 'Não se aplica'
-        WHEN situacao_da_analise_suspensiva_pbi = 'Suspensiva retirada' THEN 'Suspensiva retirada'
-        --WHEN dte_retirada_suspensiva_tgov IS NOT NULL THEN 'Suspensiva retirada'
-        --WHEN dte_primeira_data_lae_tdb IS NOT NULL THEN 'Suspensiva retirada'
-        --WHEN dte_publicacao_licitacao_tgov IS NOT NULL THEN 'Suspensiva retirada'
-        --WHEN status_homolog_licitacao_calc = 'Concluída no prazo' THEN 'Suspensiva retirada'
-        --WHEN dte_homologacao_licitacao_tgov IS NOT NULL THEN 'Suspensiva retirada'
-        --WHEN dte_vrpl_tdb IS NOT NULL THEN 'Suspensiva retirada'
-        WHEN dte_aio_tdb IS NOT NULL THEN 'Suspensiva retirada'
-        WHEN dte_inicio_obra_mcid_tci IS NOT NULL THEN 'Suspensiva retirada'
-        ELSE situacao_da_analise_suspensiva_pbi
-    END AS situacao_da_analise_suspensiva_dmp,
-
-    CASE
-        WHEN (
-            CASE
-                WHEN dsc_situacao_contrato_mcid_tci in('Em Contratação','Cancelado ou Distratado','Contratado - Em Prestação de Contas') THEN 'Não se aplica'
-                WHEN situacao_da_analise_suspensiva_pbi = 'Suspensiva retirada' THEN 'Suspensiva retirada'
-                --WHEN dte_retirada_suspensiva_tgov IS NOT NULL THEN 'Suspensiva retirada'
-                --WHEN dte_primeira_data_lae_tdb IS NOT NULL THEN 'Suspensiva retirada'
-                --WHEN dte_publicacao_licitacao_tgov IS NOT NULL THEN 'Suspensiva retirada'
-                --WHEN status_homolog_licitacao_calc = 'Concluída no prazo' THEN 'Suspensiva retirada'
-                --WHEN dte_homologacao_licitacao_tgov IS NOT NULL THEN 'Suspensiva retirada'
-                --WHEN dte_vrpl_tdb IS NOT NULL THEN 'Suspensiva retirada'
-                WHEN dte_aio_tdb IS NOT NULL THEN 'Suspensiva retirada'
-                WHEN dte_inicio_obra_mcid_tci IS NOT NULL THEN 'Suspensiva retirada'
-                ELSE situacao_da_analise_suspensiva_pbi
-            END
-        ) = 'Suspensiva retirada' THEN 'Contratado - Normal'
-        ELSE dsc_situacao_contrato_mcid_tci
-    END AS situacao_contrato_dmp,
-
-    CASE
-        WHEN dsc_situacao_contrato_mcid_tci in('Em Contratação','Cancelado ou Distratado','Contratado - Em Prestação de Contas') THEN 'Não se aplica'
         WHEN situacao_da_analise_suspensiva_pbi = 'Suspensiva retirada' THEN 'situacao_da_analise_suspensiva_pbi'
         --WHEN dte_retirada_suspensiva_tgov IS NOT NULL THEN 'dte_retirada_suspensiva_tgov'
         --WHEN dte_primeira_data_lae_tdb IS NOT NULL THEN 'dte_primeira_data_lae_tdb'
