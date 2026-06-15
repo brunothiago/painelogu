@@ -17,7 +17,7 @@ import {hexToRgba} from "./lib/dom-helpers.js";
 const rawText = await FileAttachment("data/base_pc_32.csv").text();
 const previousRawText = await FileAttachment("data/base_pc_32_previous.csv").text();
 const baseDiffLatest = await FileAttachment("data/base_diff_latest.json").json();
-const fluxoPc72ImageUrl = await FileAttachment("assets/fluxo-pc72.jpeg").url();
+const fluxoPc32ImageUrl = await FileAttachment("assets/fluxo-pc32.png").url();
 const dsv = dsvFormat(";");
 
 function pickField(row, ...names) {
@@ -1839,9 +1839,9 @@ const selectedDocSuspensiva = view(docPendInput);
 
 ```js
 display(createReferenceImageButton({
-  label: "Ver fluxo PC 72",
-  title: "Fluxo de prazos — Portaria Conjunta 72/2025",
-  imageUrl: fluxoPc72ImageUrl,
+  label: "Ver fluxo PC 32",
+  title: "Fluxo de prazos — Portaria Conjunta 32/2024",
+  imageUrl: fluxoPc32ImageUrl,
   caption: "Referência visual do fluxo de prazos do termo de compromisso do Novo PAC, da condição suspensiva até a prestação de contas.",
 }));
 ```
