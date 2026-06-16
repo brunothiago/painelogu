@@ -44,7 +44,7 @@ SELECT
     'Documentos apresentados' AS tipo_doc_suspensiva,
     instrumento,
     (SELECT saci.cod_tci FROM se_saci.view_mat_carteira_investimento saci
-     WHERE saci.num_convenio::numeric = instrumento::numeric LIMIT 1) AS cod_saci,
+     WHERE ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND instrumento::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = instrumento::numeric) OR (saci.num_convenio::text = instrumento::text)) LIMIT 1) AS cod_saci,
     proposta, operacao, recebedor, uf, municipio_beneficiado,
     unidade_caixa, programa, valor_repasse, situacao_da_analise,
     titularidade AS doc_titularidade,
@@ -64,7 +64,7 @@ SELECT
     'Documentos não apresentados' AS tipo_doc_suspensiva,
     instrumento,
     (SELECT saci.cod_tci FROM se_saci.view_mat_carteira_investimento saci
-     WHERE saci.num_convenio::numeric = instrumento::numeric LIMIT 1) AS cod_saci,
+     WHERE ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND instrumento::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = instrumento::numeric) OR (saci.num_convenio::text = instrumento::text)) LIMIT 1) AS cod_saci,
     proposta, operacao, recebedor, uf, municipio_beneficiado,
     unidade_caixa, programa, valor_repasse, situacao_da_analise,
     titularidade AS doc_titularidade,
@@ -227,21 +227,21 @@ base AS (
     FROM se_saci.view_mat_carteira_investimento saci
     CROSS JOIN constantes c
     LEFT JOIN se_cgpac.tab_thiago_pbi_caixa_ogu pbi
-        ON saci.num_convenio::numeric = pbi.instrumento::numeric
+        ON ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND pbi.instrumento::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = pbi.instrumento::numeric) OR (saci.num_convenio::text = pbi.instrumento::text))
     LEFT JOIN mcid_bd_gestores.tab_dados_basicos tdb
         ON saci.num_convenio = tdb.cod_convenio_siafi
     LEFT JOIN publicacao_licitacao pl
-        ON saci.num_convenio::numeric = pl.num_convenio::numeric
+        ON ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND pl.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = pl.num_convenio::numeric) OR (saci.num_convenio::text = pl.num_convenio::text))
     LEFT JOIN homologacao_licitacao hl
-        ON saci.num_convenio::numeric = hl.num_convenio::numeric
+        ON ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND hl.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = hl.num_convenio::numeric) OR (saci.num_convenio::text = hl.num_convenio::text))
     LEFT JOIN mcid_transferegov.tab_convenios tcon
-        ON saci.num_convenio::numeric = tcon.num_convenio::numeric
+        ON ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND tcon.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = tcon.num_convenio::numeric) OR (saci.num_convenio::text = tcon.num_convenio::text))
     LEFT JOIN se_cgpac."Suspensiva29_04" s29
         ON saci.num_convenio::text = s29.instrumento::text
     LEFT JOIN se_cgpac.tab_thiago_pbi_caixa_ogu_susp_apre sda
-        ON saci.num_convenio::numeric = sda.instrumento::numeric
+        ON ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND sda.instrumento::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = sda.instrumento::numeric) OR (saci.num_convenio::text = sda.instrumento::text))
     LEFT JOIN se_cgpac.tab_thiago_pbi_caixa_ogu_susp_nao_apre sdn
-        ON saci.num_convenio::numeric = sdn.instrumento::numeric
+        ON ((saci.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND sdn.instrumento::text ~ '^[0-9]+(\\.[0-9]+)?$' AND saci.num_convenio::numeric = sdn.instrumento::numeric) OR (saci.num_convenio::text = sdn.instrumento::text))
     WHERE saci.txt_fonte = 'OGU'
       AND saci.dsc_fase_pac = 'NOVO PAC - Seleção'
       AND saci.txt_sigla_secretaria <> 'SNH'
@@ -374,9 +374,9 @@ SELECT 'transferegov' AS key,
        'greatest(max(tab_convenios.dte_carga), max(tab_licitacao.dte_carga))' AS method
 FROM selected_convenios sc
 LEFT JOIN mcid_transferegov.tab_convenios tc
-       ON sc.num_convenio::numeric = tc.num_convenio::numeric
+       ON ((sc.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND tc.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND sc.num_convenio::numeric = tc.num_convenio::numeric) OR (sc.num_convenio::text = tc.num_convenio::text))
 LEFT JOIN mcid_transferegov.tab_licitacao tl
-       ON sc.num_convenio::numeric = tl.num_convenio::numeric
+       ON ((sc.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND tl.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND sc.num_convenio::numeric = tl.num_convenio::numeric) OR (sc.num_convenio::text = tl.num_convenio::text))
 
 UNION ALL
 
@@ -398,7 +398,7 @@ SELECT 'power_bi_caixa' AS key,
        'max(data_atualizacao)' AS method
 FROM selected_convenios sc
 LEFT JOIN se_cgpac.tab_thiago_pbi_caixa_ogu pbi
-       ON sc.num_convenio::numeric = pbi.instrumento::numeric
+       ON ((sc.num_convenio::text ~ '^[0-9]+(\\.[0-9]+)?$' AND pbi.instrumento::text ~ '^[0-9]+(\\.[0-9]+)?$' AND sc.num_convenio::numeric = pbi.instrumento::numeric) OR (sc.num_convenio::text = pbi.instrumento::text))
 """)
 
 
