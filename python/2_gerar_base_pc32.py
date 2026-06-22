@@ -96,7 +96,7 @@ homologacao_licitacao AS (
 ),
 constantes AS (
     SELECT '2025-10-21'::date AS data_publicacao_pc72,
-           '2026-06-01'::date AS data_limite_licitacao_casa_civil
+           '2026-07-17'::date AS data_limite_licitacao_casa_civil
 ),
 base AS (
     SELECT
