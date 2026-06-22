@@ -59,6 +59,8 @@ function docsSuspensivaPendentes(d) {
     .map((k) => DOC_SUSPENSIVA_LABELS[k]);
 }
 
+const LICITACAO_PC72_CORTE = Date.UTC(2025, 9, 21);
+
 function parseBaseRow(d) {
   const dt_assinatura = parseDate(pickField(d, "dte_assinatura_contrato_saci", "dte_assinatura_contrato_tci", "dte_assinatura_contrato"));
   const dt_lae = parseDate(pickField(d, "dte_primeira_data_lae_tdb", "dte_primeira_data_lae"));
@@ -83,6 +85,9 @@ function parseBaseRow(d) {
   situacao_contrato_tci: pickField(d, "dsc_situacao_contrato_mcid_saci", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
   situacao: pickField(d, "dsc_situacao_contrato_mcid_saci", "dsc_situacao_contrato_mcid_tci", "dsc_situacao_contrato_mcid"),
   dt_assinatura,
+  pos_72: dt_assinatura instanceof Date && !isNaN(dt_assinatura)
+    ? (dt_assinatura.getTime() >= LICITACAO_PC72_CORTE ? "Nova PC 32" : "Antiga PC 32")
+    : null,
   situacao_suspensiva: pickField(d, "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
   situacao_suspensiva_pbi: pickField(d, "situacao_da_analise_suspensiva_pbi", "situacao_da_analise_suspensiva"),
   perspectiva_de_retirada_da_suspensiva: pickField(d, "perspectiva_de_retirada_da_suspensiva", "pespectiva_de_retirada_da_suspensiva"),
@@ -181,8 +186,6 @@ function isSemSuspensivaDmp(d) {
 function isContratoNormal(d) {
   return d.situacao === "Contratado - Normal";
 }
-
-const LICITACAO_PC72_CORTE = Date.UTC(2025, 9, 21);
 
 function isSemPrazoPc72(d) {
   return d.dt_assinatura instanceof Date && !isNaN(d.dt_assinatura) && d.dt_assinatura.getTime() < LICITACAO_PC72_CORTE;
@@ -1994,7 +1997,7 @@ const tableData = geoScopedData.filter(d =>
 
 const exportColumns = [
   "_diff_label", "num_convenio", "cod_tci", "secretaria", "regiao", "uf", "municipio", "proponente", "fase", "modalidade",
-  "situacao_contrato_tci", "situacao_suspensiva_pbi", "dt_assinatura", "dt_vencimento_suspensiva", "mes_ano_vencimento_suspensiva",
+  "situacao_contrato_tci", "situacao_suspensiva_pbi", "dt_assinatura", "pos_72", "dt_vencimento_suspensiva", "mes_ano_vencimento_suspensiva",
   "dt_retirada_suspensiva", "perspectiva_de_retirada_da_suspensiva", "dt_lae", "dt_lae_mais_60", "dt_lae_mais_60_mais_120", "data_limite_licitacao_casa_civil", "status_regra_casa_civil", "prazo_pub_licitacao", "status_pub_licitacao",
   "dt_pub_licitacao", "prazo_homolog_licitacao", "status_homolog_licitacao", "dt_homolog_licitacao",
   "dt_vrpl", "dt_aio", "prazo_inicio_obra", "status_inicio_obra", "dt_inicio_obra", "vlr_repasse",
@@ -2020,6 +2023,7 @@ const exportHeaders = {
   dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
   perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
   dt_assinatura: "Assinatura (SACI)",
+  pos_72: "Pos-72",
   dt_lae: "LAE (TDB)",
   dt_lae_mais_60: "Publ. Licit. = LAE + 60d +60d (CALC)",
   dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60d +60d)+ 120 + 60 (CALC)",
@@ -2062,6 +2066,7 @@ const defaultSelectedColumns = [
   "situacao_contrato_tci",
   "situacao_suspensiva_pbi",
   "dt_assinatura",
+  "pos_72",
   "dt_vencimento_suspensiva",
   "mes_ano_vencimento_suspensiva",
   "dt_retirada_suspensiva",
@@ -2193,7 +2198,7 @@ display(renderBaseDataTable({
     situacao_suspensiva_pbi: "Situação Suspensiva (PBI)",
     dt_vencimento_suspensiva: "Venc. Suspensiva (PBI)", mes_ano_vencimento_suspensiva: "Mês/Ano Venc. Susp.", dt_retirada_suspensiva: "Retirada Suspensiva (TGOV)",
     perspectiva_de_retirada_da_suspensiva: "Perspectiva de Retirada da Suspensiva",
-    dt_assinatura: "Assinatura (SACI)", dt_lae: "LAE (TDB)", dt_lae_mais_60: "Publ. Licit. = LAE + 60d +60d (CALC)", dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60d +60d)+ 120 + 60 (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
+    dt_assinatura: "Assinatura (SACI)", pos_72: "Pos-72", dt_lae: "LAE (TDB)", dt_lae_mais_60: "Publ. Licit. = LAE + 60d +60d (CALC)", dt_lae_mais_60_mais_120: "Fim Licit. = (LAE + 60d +60d)+ 120 + 60 (CALC)", data_limite_licitacao_casa_civil: "Data Limite Licitação (CONST)", status_regra_casa_civil: "Cumprimento Regra Casa Civil (CALC)", prazo_pub_licitacao: "Prazo Publicação (CALC)",
     status_pub_licitacao: "Status Publicação (CALC)", dt_pub_licitacao: "Pub. Licitação (TGOV)",
     prazo_homolog_licitacao: "Prazo Homolog. (CALC)", status_homolog_licitacao: "Status Homolog. (CALC)",
     dt_homolog_licitacao: "Homolog. Licitação (TGOV)", dt_vrpl: "VRPL (TDB)", dt_aio: "AIO (TDB)", prazo_inicio_obra: "Prazo Início Obra (CALC)", status_inicio_obra: "Status Início Obra (CALC)",
