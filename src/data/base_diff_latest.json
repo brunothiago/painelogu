@@ -8,9 +8,9 @@
   "resumo": {
     "entered": 0,
     "exited": 0,
-    "changed_records": 62,
+    "changed_records": 63,
     "changed_data_records": 58,
-    "changed_time_records": 4
+    "changed_time_records": 5
   },
   "mudancas_status": {
     "status_suspensiva_calc": 2,
