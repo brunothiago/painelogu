@@ -33,7 +33,7 @@ export default {
   pager: false,
   search: false,
   pages: [
-    { name: "Painel", path: "index" },
+    { name: "Novas Seleções", path: "index" },
     { name: "Alterações", path: "alteracoes" },
     { name: "DocSuspensivas", path: "docsuspensivas" },
     { name: "Legado OGU", path: "legado/index" },
@@ -67,7 +67,7 @@ export default {
           </a>
         </div>
         <nav class="site-nav" aria-label="Navegação principal">
-          <a href="./">Painel</a>
+          <a href="./">Novas Seleções</a>
           <a href="./alteracoes">Alterações</a>
           <a href="./docsuspensivas">DocSuspensivas</a>
           <a href="./legado/">Legado OGU</a>
@@ -78,6 +78,7 @@ export default {
       const resolveCurrentNavPath = ${resolveCurrentNavPath.toString()};
       (() => {
         const currentNavPath = resolveCurrentNavPath(location.pathname);
+        if (/\\/legado(\\/|$)/.test(currentNavPath)) document.documentElement.classList.add("section-legado");
         document.querySelectorAll(".site-nav a").forEach((a) => {
           const href = new URL(a.getAttribute("href"), location.href).pathname.replace(/\\/$/, "") || "/";
           if (href === currentNavPath) a.setAttribute("aria-current", "page");

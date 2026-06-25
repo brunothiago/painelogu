@@ -4395,3 +4395,14 @@ body {
         line-height: 1.7;
     }
 }
+
+/* ==========================================================================
+   Cue de seção — dentro do Legado, a barra superior fica grafite/ardósia
+   (Novas Seleções permanece verde). A classe .section-legado é adicionada
+   ao <html> pelo script inline do header (observablehq.config.js) quando o
+   caminho está em /legado.
+   ========================================================================== */
+html.section-legado .site-topbar {
+    background: #334155;
+    border-color: rgba(15, 23, 42, 0.9);
+}
