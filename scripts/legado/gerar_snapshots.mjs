@@ -1,5 +1,6 @@
 // Gera snapshots datados da base de legado e os artefatos de "Alterações":
 //   - data/historico/base_legado_<data>.csv   (snapshot completo)
+//   - src/legado/data/base_legado.csv         (base estática versionada lida pelo painel)
 //   - src/data/base_alteracoes.csv             (mudanças acumuladas entre snapshots)
 //   - src/data/base_diff_latest.json           (resumo do snapshot atual vs anterior)
 //
@@ -71,6 +72,10 @@ function main() {
 
   // 1) grava/atualiza o snapshot do dia
   writeFileSync(`${HISTORICO_DIR}base_legado_${snapshotDate}.csv`, dsv.format(rows, FIELDS));
+
+  // 1b) grava a base estática consumida pelo painel (src/legado/data/base_legado.csv).
+  // É um arquivo versionado — o build do CI não tem o XLSX-fonte, então o painel lê este CSV.
+  writeFileSync(`${DATA_DIR}base_legado.csv`, dsv.format(rows, FIELDS));
 
   // 2) carrega todos os snapshots, ordenados por data
   const snapshots = readdirSync(HISTORICO_DIR)
