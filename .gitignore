@@ -8,3 +8,5 @@ src/.observablehq/cache/
 config.env
 scripts/update.log
 **/__pycache__/
+data/legado/*.xlsx
+_arquivo/

@@ -36,6 +36,7 @@ export default {
     { name: "Painel", path: "index" },
     { name: "Alterações", path: "alteracoes" },
     { name: "DocSuspensivas", path: "docsuspensivas" },
+    { name: "Legado OGU", path: "legado/index" },
   ],
   head: `
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,6 +70,7 @@ export default {
           <a href="./">Painel</a>
           <a href="./alteracoes">Alterações</a>
           <a href="./docsuspensivas">DocSuspensivas</a>
+          <a href="./legado/">Legado OGU</a>
         </nav>
       </div>
     </div>

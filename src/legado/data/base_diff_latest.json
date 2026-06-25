@@ -1,0 +1,13 @@
+{
+  "snapshot_atual": "2026-06-25",
+  "snapshot_anterior": "2026-06-12",
+  "snapshot_primeiro": "2026-06-12",
+  "total_atual": 567,
+  "total_anterior": 567,
+  "delta_total": 0,
+  "resumo": {
+    "entered": 0,
+    "exited": 0,
+    "changed_records": 348
+  }
+}
