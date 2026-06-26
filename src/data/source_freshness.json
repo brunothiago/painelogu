@@ -1,11 +1,11 @@
 {
-  "snapshot_atual": "2026-06-25",
+  "snapshot_atual": "2026-06-26",
   "sources": [
     {
       "key": "tci_mcid",
       "label": "SACI/ Ministério das Cidades",
       "sigla": "TCI/MCID",
-      "updated_at": "2026-06-22",
+      "updated_at": "2026-06-25",
       "method": "max(dte_carga)",
       "fallback": false
     },
@@ -37,7 +37,7 @@
       "key": "dmp",
       "label": "Diretoria de Monitoramento de Projetos",
       "sigla": "DMP",
-      "updated_at": "2026-06-25",
+      "updated_at": "2026-06-26",
       "method": "snapshot_atual",
       "fallback": true,
       "note": "Fallback: nenhuma tabela/coluna de carga dedicada da DMP foi identificada no pipeline atual."

@@ -1,24 +1,24 @@
 {
-  "snapshot_atual": "2026-06-25",
-  "snapshot_anterior": "2026-06-24",
+  "snapshot_atual": "2026-06-26",
+  "snapshot_anterior": "2026-06-25",
   "snapshot_primeiro": "2026-04-07",
-  "total_atual": 1616,
+  "total_atual": 1617,
   "total_anterior": 1616,
-  "delta_total": 0,
+  "delta_total": 1,
   "resumo": {
-    "entered": 0,
+    "entered": 1,
     "exited": 0,
-    "changed_records": 20,
-    "changed_data_records": 18,
-    "changed_time_records": 2
+    "changed_records": 23,
+    "changed_data_records": 23,
+    "changed_time_records": 0
   },
   "mudancas_status": {
-    "status_suspensiva_calc": 1,
-    "status_pub_licitacao_calc": 3,
-    "status_homolog_licitacao_calc": 1,
-    "status_inicio_obra_calc": 0,
+    "status_suspensiva_calc": 0,
+    "status_pub_licitacao_calc": 0,
+    "status_homolog_licitacao_calc": 0,
+    "status_inicio_obra_calc": 5,
     "status_regra_casa_civil_calc": 0,
-    "urgencia_suspensiva_calc": 1,
-    "fase_atual_calc": 4
+    "urgencia_suspensiva_calc": 2,
+    "fase_atual_calc": 5
   }
 }
