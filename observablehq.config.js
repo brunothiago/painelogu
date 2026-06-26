@@ -68,7 +68,6 @@ export default {
         </div>
         <nav class="site-nav" aria-label="Navegação principal">
           <a href="./">Novas Seleções</a>
-          <a href="./alteracoes">Alterações</a>
           <a href="./docsuspensivas">DocSuspensivas</a>
           <a href="./legado/">Legado OGU</a>
         </nav>
@@ -81,8 +80,10 @@ export default {
         if (/\\/legado(\\/|$)/.test(currentNavPath)) document.documentElement.classList.add("section-legado");
         document.querySelectorAll(".site-nav a").forEach((a) => {
           const href = new URL(a.getAttribute("href"), location.href).pathname.replace(/\\/$/, "") || "/";
+          const label = a.textContent.trim();
+          const isNovasSelecoesSection = label === "Novas Seleções" && /\\/alteracoes$/.test(currentNavPath) && !/\\/legado\\/alteracoes$/.test(currentNavPath);
           const isLegadoSection = href.endsWith("/legado") && /\\/legado(\\/|$)/.test(currentNavPath);
-          if (href === currentNavPath || isLegadoSection) a.setAttribute("aria-current", "page");
+          if (href === currentNavPath || isNovasSelecoesSection || isLegadoSection) a.setAttribute("aria-current", "page");
         });
       })();
     </script>

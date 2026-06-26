@@ -158,6 +158,7 @@ pageTitleBar.innerHTML = `
       <span class="page-titlebar__meta-label">Atualizado em</span>
       <strong class="page-titlebar__meta-value">${updatedAt}</strong>
     </div>
+    <a class="page-subnav-link" href="./" style="display:inline-flex;align-items:center;font-size:0.8125rem;font-weight:600;text-decoration:none;padding:0.35rem 0.7rem;background:#92400e;color:#fff;border:1.5px solid #7c2d12;border-radius:999px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.16);">← Voltar ao Painel Novas Seleções</a>
   </div>
 `;
 display(pageTitleBar);
