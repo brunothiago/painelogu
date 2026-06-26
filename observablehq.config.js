@@ -81,7 +81,8 @@ export default {
         if (/\\/legado(\\/|$)/.test(currentNavPath)) document.documentElement.classList.add("section-legado");
         document.querySelectorAll(".site-nav a").forEach((a) => {
           const href = new URL(a.getAttribute("href"), location.href).pathname.replace(/\\/$/, "") || "/";
-          if (href === currentNavPath) a.setAttribute("aria-current", "page");
+          const isLegadoSection = href.endsWith("/legado") && /\\/legado(\\/|$)/.test(currentNavPath);
+          if (href === currentNavPath || isLegadoSection) a.setAttribute("aria-current", "page");
         });
       })();
     </script>
