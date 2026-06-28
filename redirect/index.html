@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Painel movido — Novo PAC</title>
+<script>
+  // Catch-all: /painelogu/<resto> -> /painelpac/ogu/<resto>
+  // Preserva subcaminho, query e hash. Serve tanto para index quanto para 404.
+  (function () {
+    var BASE = "/painelogu";
+    var DEST = "/painelpac/ogu";
+    var p = location.pathname;
+    var rest = p.indexOf(BASE) === 0 ? p.slice(BASE.length) : "/";
+    if (!rest || rest === "/") rest = "/";
+    location.replace(DEST + rest + location.search + location.hash);
+  })();
+</script>
+<meta http-equiv="refresh" content="0; url=/painelpac/ogu/">
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 4rem auto; max-width: 32rem; padding: 0 1.25rem; color: #1f2937; }
+  a { color: #0e7490; }
+</style>
+</head>
+<body>
+  <h1>Este painel foi movido</h1>
+  <p>O Painel OGU agora faz parte do <strong>painelpac</strong>.</p>
+  <p>Redirecionando para <a href="/painelpac/ogu/">/painelpac/ogu/</a>…</p>
+</body>
+</html>
